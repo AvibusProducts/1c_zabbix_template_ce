@@ -6,6 +6,7 @@
 #
 # Email: fedotov@kaminsoft.ru
 #
+#set -x
 
 WORK_DIR=$(dirname "${0}" | sed -r 's/\\/\//g; s/^(.{1}):/\/\1/')
 
@@ -24,6 +25,12 @@ function check_log_dir {
     [[ ! -d "${1}/zabbix/${2}" ]] && error "Неверно задан каталог технологического журнала!"
 }
 
+function check_measures_dir {
+	[[ ! -d "${1}/" ]] && error "Неверно задан каталог замеров времени!"
+	mkdir "${1}/inprocess" 2>/dev/null
+	mkdir "${1}/processed" 2>/dev/null
+}
+
 function get_calls_info {
 
     MODE=${1}
@@ -31,43 +38,148 @@ function get_calls_info {
     [[ -n ${2} ]] && TOP_LIMIT=${2} || TOP_LIMIT=25
 
     case ${MODE} in
-        count) echo "Кол-во | Длит-ть,с | СрДл-ть,мс | Контекст";;
-        cpu) echo "Процессор,с (%) | Длит-ть,с | Кол-во | СрДл-ть,мс | Контекст";;
-        duration) echo "Длительность,с (%) | Кол-во | СрДл-ть,мс | Процессор | Контекст";;
-        lazy) echo "Длит-ть,с | Кол-во | СрДл-ть,мс | Процессор | Контекст";;
-        dur_avg) echo "СрДл-ть,с | Длит-ть,с | Кол-во | Процессор | Контекст";;
-        memory) echo "Память,МБ | СрДл-ть,мс | СрПр-ор,мс | Кол-во | Контекст";;
-        iobytes) echo "Объем IO,МБ | Длит-ть,с | Процессор | Кол-во | Контекст";;
+        count) echo -e "Кол\t|Длит\t|CPU\t|Сред\t|CPUСр\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
+        cpu) echo -e "CPU\t|CPUСр\t|Длит\t|Сред\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
+        duration) echo -e "Длит\t|Сред\t|CPU\t|CPUСр\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
+        lazy) echo -e "Отн\t|ОтнСр\t|Длит\t|CPU\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
+        dur_avg) echo -e "Сред\t|Длит\t|CPU\t|CPUСр\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
+        cpu_avg) echo -e "CPUСр\t|CPU\t|Сред\t|Длит\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
+        memorypeak) echo -e "ОЗУПик\t|ПикСр\t|ОЗУ\t|ОЗУСр\t|Длит\t|Сред\t|Кол\t|Тип\tКонтекст";;
+        memory) echo -e "ОЗУ\t|ОЗУСр\t|ОЗУПик\t|ПикСр\t|Длит\t|Сред\t|Кол\t|Тип\tКонтекст";;
+		iobytes) echo -e "СумIO\t|СредIO\t|In\t|Out\t|Длит\t|Сред\t|Кол\t|Тип\tКонтекст";;
         *) error "${ERROR_UNKNOWN_PARAM}" ;;
     esac
 
     put_brack_line
 
-    cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | awk "/CALL,.*(Context|Module)/" | \
-	sed -re 's/,Module=(.*),Method=/,Context=ОбщийМодуль.ФоновыйВызов : ОбщийМодуль.\1.Модуль./' | \
-        sed -re "s/[0-9]+:[0-9]+.[0-9]+-//; s/,Method=[^,]+//; s/,[a-zA-Z:]+=/,/g" | \
-        awk -F, -v mode="${MODE}" '{ if ($4) {count[$4"->"$5]+=1; durations[$4"->"$5]+=$1; \
-            cpus[$4"->"$5]+=$9; iobytes[$4"->"$5]+=$7+$8; duration[$4]+=$1; cpu[$4]+=$9; \
-            if ( mempeak[$4"->"$5] < $6 ) { mempeak[$4"->"$5]=$6; } } } \
-        END { for ( i in count ) { \
-            if ( mode == "count" ) { printf "%6d | %9.2f | %10.2f | %s\n", count[i], \
-                durations[i]/1000000, durations[i]/count[i]/1000, i } \
-            else if ( mode == "cpu" ) { printf "%8.2f (%4.1f) | %9.2f | %6d | %10.2f | %s\n", \
-                cpus[i]/1000000, cpus[i]/cpu[substr(i,0,index(i,"->")-1)]*100, durations[i]/1000000, count[i], durations[i]/count[i]/1000, i }  \
-            else if ( mode == "lazy" ) { printf "%f@%9.2f | %6d | %10.2f | %9.2f | %s\n", \
-                durations[i]/cpus[i], durations[i]/1000000, count[i], durations[i]/count[i]/1000, cpus[i]/1000000, i }  \
-            else if ( mode == "dur_avg" ) { printf "%9.2f | %9.2f | %6d | %9.2f | %s\n", \
-                durations[i]/count[i]/1000000, durations[i]/1000000, count[i], cpus[i]/1000000, i }  \
-            else if ( mode == "duration" ) { printf "%11.2f (%4.1f) | %6d | %10.2f | %9.2f | %s\n", \
-                durations[i]/1000000, durations[i]/duration[substr(i,0,index(i, "->")-1)]*100, count[i], durations[i]/count[i]/1000, cpus[i]/1000000, i } \
-            else if ( mode == "memory" ) { printf "%9.2f | %10.2f | %10.2f | %6d | %s\n", \
-                mempeak[i]/1024/1024, durations[i]/count[i]/1000, cpus[i]/count[i]/1000, count[i], i } \
-            else if ( mode == "iobytes" ) { printf "%11.2f | %9.2f | %9.2f | %6d | %s\n", \
-                iobytes[i]/1024/1024, durations[i]/1000000, cpus[i]/1000000, count[i], i } \
-            } }' | \
-        sort -rn | head -n "${TOP_LIMIT}" | awk -v mode="${MODE}" -F"@" '{ if ( mode == "lazy" ) { print $2 } else { print $0 } }'
+	grep -H "" "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | awk "/CALL,.*(Context|Module|applicationName=WebServerExtension)/" |
+	perl -pe 's/\xef\xbb\xbf//g' |
+	# Убираем путь, оставляем имя процесса и очищаем время вызова
+	perl -pe 's/.*\/(.+_\d+)\/.+\.log:(\d{2}:\d{2})\.(\d{6})-(\d+)/$1,$4/g' |
+	# Серверные вызовы
+	perl -pe 's/(.+?),(.+?),CALL,.*?p:processName=(.+?),.*?Usr=(.+?),.*?Context=(.*?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$2ϖServerCallϖ$3ϖ$4ϖ$5ϖ$6ϖ$7ϖ$8ϖ$9ϖ$10ϖ$1/' |
+	# Регламентные задания
+	perl -pe 's/(.+?),(.+?),CALL,.*?Usr=(.+?),.*?p:processName=(.+?),.*?Module=(.+),Method=(.*?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$2ϖBackgroundJobϖ$4ϖ$3ϖ$5.$6ϖ$7ϖ$8ϖ$9ϖ$10ϖ$11ϖ$1/' |
+	# Веб-сервисы
+	perl -pe 's/(.+?),(.+?),CALL,.*?p:processName=(.+?),.*?=WebServerExtension.*?,Usr=(.+?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$2ϖWebServerϖ$3ϖ$4ϖWebServerϖ$5ϖ$6ϖ$7ϖ$8ϖ$9ϖ$1/' |
+	# Группировка в разрезе пользователя, контекста и имени процесса: удалить из выражения <Group=Db "@" Usr "@" Proc;> ненужные переменные, если группировка не нужна
+	gawk -F'ϖ' -v mode="${MODE}" '\
+		{CurDur=$1; Type=$2; Db=$3; Usr=$4; Cntx="Cntx="$5; Proc=$11; \
+		Group=Type ":" Db; \
+		if (Type=="WebServer") Group=Group ":" Usr; \
+		CurMem=$6; CurMemPeak=$7; CurInBytes=$8; CurOutBytes=$9; CurCpuTime=$10; \
+		Dur[Group][Cntx]+=CurDur; \
+		CpuTime[Group][Cntx]+=CurCpuTime; \
+		Mem[Group][Cntx]+=CurMem; \
+		MemPeak[Group][Cntx]+=CurMemPeak; \
+		In[Group][Cntx]+=CurInBytes; \
+		Out[Group][Cntx]+=CurOutBytes; \
+		Execs[Group][Cntx]+=1; \
+		if (CurMem > 0) MemPositive[Group][Cntx]+=CurMem; else MemNegative[Group][Cntx]+=CurMem;} END \
+		{Koef=1000*1000; KoefMem=1024*1024; \
+		for (Group in Dur) { \
+			for (Cntx in Dur[Group]) { \
+				cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
+				if (mode == "count") { \
+					printf "%d\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%s\t%s\n", \
+					cExecs, cDur, cCpuTime, cDur/cExecs, cCpuTime/cExecs, cMemP, cMem, Group, Cntx } \
+				else if (mode == "cpu") { \
+					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
+					cCpuTime, cCpuTime/cExecs, cDur, cDur/cExecs, cExecs, cMemP, cMem, Group, Cntx } \
+				else if (mode == "duration") { \
+					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
+					cDur, cDur/cExecs, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } \
+				else if (mode == "lazy") { \
+					if (cCpuTime == 0) continue;
+					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
+					cDur/cCpuTime, (cDur/cCpuTime)/cExecs, cDur, cCpuTime, cExecs, cMemP, cMem, Group, Cntx } \
+				else if (mode == "dur_avg") { \
+					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
+					cDur/cExecs, cDur, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } \
+				else if (mode == "cpu_avg") { \
+					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
+					cDur/cExecs, cDur, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } \
+				else if (mode == "memorypeak") { \
+					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%s\t%s\n", \
+					cMemP, cMemP/cExecs, cMem, cMem/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } \
+				else if (mode == "memory") { \
+					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%s\t%s\n", \
+					cMem, cMem/cExecs, cMemP, cMemP/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } \
+				else if (mode == "iobytes") { \
+					cIn=In[Group][Cntx]/KoefMem; cOut=Out[Group][Cntx]/KoefMem; \
+					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%s\t%s\n", \
+					cIn+cOut, (cIn+cOut)/cExecs, cIn, cOut, cDur, cCpuTime, cExecs, Group, Cntx } \
+			} \
+		}} ' |
+	sort -rn | head -n "${TOP_LIMIT}"
+    
 }
 
+function get_measures_info {
+
+    [[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
+
+	ls ${LOG_DIR}/*.xml >/dev/null 2>&1 || error "Нет файлов для обработки"
+
+	echo -e "Apdex\t|Сред\t|Цел\t|Кол\t|Операция"
+
+	put_brack_line
+
+	mv "${LOG_DIR}"/*.xml "${LOG_DIR}"/inprocess 2>/dev/null
+
+	RESULT=$(cat "${LOG_DIR}"/inprocess/*.xml 2>/dev/null | \
+		perl -pe 's/\xef\xbb\xbf//g' | \
+		sed '/<\/prf:/d' | \
+		perl -pe 's/\n/@@/g; s/<prf:KeyOperation/\n<prf:KeyOperation/g' | \
+		awk '/<prf:KeyOperation/' | \
+		perl -pe 's/@@.*?measurement value=\"(.+?)\".*?\/>/$1;/g' | \
+		perl -pe 's/.*?targetValue=\"(.+?)\".*?nameFull=\"(.+?)\".*?>/$1ϖ$2ϖ/g' | \
+		perl -pe 's/@@//g' | \
+		gawk -F'ϖ' '\
+			{target=$1; oper=$2; \
+			operVal[oper]["target"]=target; \
+			split($3, values, ";"); \
+			target4=target*4; \
+			sum=0; \
+			count=0; \
+			countT=0; \
+			count4T=0; \
+			for (value in values) { \
+				curValue=values[value]; \
+				if (!curValue) continue; \
+				sum+=curValue; \
+				count++; \
+				if (curValue<target) countT++; \
+				else if (curValue<target4) count4T++; \
+			} \
+			operVal[oper]["value"]+=sum; \
+			operVal[oper]["count"]+=count; \
+			operVal[oper]["countT"]+=countT; \
+			operVal[oper]["count4T"]+=count4T; \
+			} END { \
+			count=0; \
+			countT=0; \
+			count4T=0; \
+			for (oper in operVal) {\
+				count+=operVal[oper]["count"]; \
+				countT+=operVal[oper]["countT"]; \
+				count4T+=operVal[oper]["count4T"]; \
+				printf "%.2f\t|%.3f\t|%.2f\t|%d\t|%s\n", \
+					(operVal[oper]["countT"] + operVal[oper]["count4T"]/2)/operVal[oper]["count"], \
+					operVal[oper]["value"]/operVal[oper]["count"], \
+					operVal[oper]["target"], \
+					operVal[oper]["count"], \
+					oper \
+			} \
+			if (count > 0) printf "%s%.2f\t|%s\n", "!",(countT+count4T/2)/count, "Общий APDEX" \
+			}' | \
+		sort -n | head -n "${TOP_LIMIT}")
+	echo "${RESULT}"
+	
+	rm "${LOG_DIR}"/processed/* 2>/dev/null
+	mv "${LOG_DIR}"/inprocess/*.xml "${LOG_DIR}"/processed 2>/dev/null
+
+}
 
 function get_locks_info {
 
@@ -211,7 +323,10 @@ case ${1} in
         export LOG_DIR="${2%/}/zabbix/${1}" ;;&
     excps) PROCESS_NAMES=(ragent rmngr rphost) ;;&
     calls) shift 2; get_calls_info "${@}" ;;
-    locks) shift 2; get_locks_info "${@}" ;;
+    measures) check_measures_dir "${2}";
+		export LOG_DIR="${2%/}" ;;&
+	measures) shift 2; get_measures_info "${@}" ;;
+	locks) shift 2; get_locks_info "${@}" ;;
     excps) shift 2; get_excps_info "${@}" ;;
     memory) get_memory_counts ;;
     ram) get_physical_memory ;;

@@ -7,7 +7,7 @@
             <name>Templates/Applications</name>
         </group>
         <group>
-            <name>Templates/Kaminsoft</name>
+            <name>Templates/1C</name>
         </group>
     </groups>
     <templates>
@@ -16,13 +16,13 @@
             <name>Template App 1C Enterprise Work Server</name>
             <description>Шаблон для мониторинга рабочего сервера 1С Предприятия&#13;
 &#13;
-Подробнее https://slothfk.github.io/1c_zabbix_template_ce/</description>
+Подробнее https://github.com/AvibusProducts/1c_zabbix_template_ce</description>
             <groups>
                 <group>
                     <name>Templates/Applications</name>
                 </group>
                 <group>
-                    <name>Templates/Kaminsoft</name>
+                    <name>Templates/1C</name>
                 </group>
             </groups>
             <applications>
@@ -44,11 +44,10 @@
             </applications>
             <items>
                 <item>
-                    <name>[1С/Серверные вызовы] ТОП{$TOP_LIST_SIZE} по суммарному количеству</name>
+                    <name>[1С/Серверные вызовы] ТОП по суммарному количеству</name>
                     <key>1c.ws.calls[{$LOG_DIR},count,{$TOP_LIST_SIZE}]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
-                    <status>DISABLED</status>
                     <value_type>TEXT</value_type>
                     <applications>
                         <application>
@@ -57,11 +56,10 @@
                     </applications>
                 </item>
                 <item>
-                    <name>[1С/Серверные вызовы] ТОП{$TOP_LIST_SIZE}  по суммарному процессорному времени</name>
+                    <name>[1С/Серверные вызовы] ТОП по суммарному процессорному времени</name>
                     <key>1c.ws.calls[{$LOG_DIR},cpu,{$TOP_LIST_SIZE}]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
-                    <status>DISABLED</status>
                     <value_type>TEXT</value_type>
                     <applications>
                         <application>
@@ -70,11 +68,10 @@
                     </applications>
                 </item>
                 <item>
-                    <name>[1С/Серверные вызовы] ТОП{$TOP_LIST_SIZE} по суммарной длительности</name>
+                    <name>[1С/Серверные вызовы] ТОП по суммарной длительности</name>
                     <key>1c.ws.calls[{$LOG_DIR},duration,{$TOP_LIST_SIZE}]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
-                    <status>DISABLED</status>
                     <value_type>TEXT</value_type>
                     <applications>
                         <application>
@@ -83,11 +80,10 @@
                     </applications>
                 </item>
                 <item>
-                    <name>[1С/Серверные вызовы] ТОП{$TOP_LIST_SIZE} по средней длительности</name>
+                    <name>[1С/Серверные вызовы] ТОП по средней длительности</name>
                     <key>1c.ws.calls[{$LOG_DIR},dur_avg,{$TOP_LIST_SIZE}]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
-                    <status>DISABLED</status>
                     <value_type>TEXT</value_type>
                     <applications>
                         <application>
@@ -96,11 +92,10 @@
                     </applications>
                 </item>
                 <item>
-                    <name>[1С/Серверные вызовы] ТОП{$TOP_LIST_SIZE} по суммарному вводу-выводу</name>
+                    <name>[1С/Серверные вызовы] ТОП по суммарному вводу-выводу</name>
                     <key>1c.ws.calls[{$LOG_DIR},iobytes,{$TOP_LIST_SIZE}]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
-                    <status>DISABLED</status>
                     <value_type>TEXT</value_type>
                     <applications>
                         <application>
@@ -109,11 +104,10 @@
                     </applications>
                 </item>
                 <item>
-                    <name>[1С/Серверные вызовы] ТОП{$TOP_LIST_SIZE} &quot;ленивых&quot; вызовов</name>
+                    <name>[1С/Серверные вызовы] ТОП &quot;ленивых&quot; вызовов</name>
                     <key>1c.ws.calls[{$LOG_DIR},lazy,{$TOP_LIST_SIZE}]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
-                    <status>DISABLED</status>
                     <value_type>TEXT</value_type>
                     <applications>
                         <application>
@@ -122,11 +116,22 @@
                     </applications>
                 </item>
                 <item>
-                    <name>[1С/Серверные вызовы] ТОП{$TOP_LIST_SIZE} по максимальной памяти за вызов</name>
+                    <name>[1С/Серверные вызовы] ТОП по максимальной памяти за вызов</name>
+                    <key>1c.ws.calls[{$LOG_DIR},memorypeak,{$TOP_LIST_SIZE}]</key>
+                    <delay>1h</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>[1С] Производительность</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>[1С/Серверные вызовы] ТОП по не освобожденной памяти за вызов</name>
                     <key>1c.ws.calls[{$LOG_DIR},memory,{$TOP_LIST_SIZE}]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
-                    <status>DISABLED</status>
                     <value_type>TEXT</value_type>
                     <applications>
                         <application>
@@ -270,7 +275,6 @@
                     <key>1c.ws.locks[{$LOG_DIR},{$MAX_LOCK_WAIT},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     <delay>1h</delay>
                     <trends>0</trends>
-                    <status>DISABLED</status>
                     <value_type>TEXT</value_type>
                     <applications>
                         <application>
@@ -566,6 +570,47 @@
                         <key>1c.ws.memory</key>
                     </master_item>
                 </item>
+                <item>
+                    <name>[1С/APDEX] ТОП операций с худшим APDEX</name>
+                    <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE}]</key>
+                    <delay>15m</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>[1С] Производительность</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>[1С/APDEX] Общий APDEX</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.measures.apdex</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <applications>
+                        <application>
+                            <name>[1С] Производительность</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>!(\d+\.\d*).*?Общий APDEX
+\1</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE}]</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;{$MIN_APDEX}</expression>
+                            <name>[1С/APDEX] Общее значение APDEX ниже допустимого</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
+                </item>
             </items>
             <macros>
                 <macro>
@@ -575,7 +620,7 @@
                 </macro>
                 <macro>
                     <macro>{$LOG_DIR}</macro>
-                    <value>/var/log/1C</value>
+                    <value>/var/log/1c/</value>
                     <description>Каталог технологического журнала</description>
                 </macro>
                 <macro>
@@ -610,6 +655,11 @@
                     <macro>{$TOP_LIST_SIZE}</macro>
                     <value>25</value>
                     <description>Количество записей в TOP-списках</description>
+                </macro>
+                <macro>
+                    <macro>{$MIN_APDEX}</macro>
+                    <value>0.85</value>
+                    <description>Минимальное допустимое значение APDEX</description>
                 </macro>
             </macros>
         </template>

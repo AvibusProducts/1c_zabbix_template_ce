@@ -28,10 +28,19 @@
             <ne property="module" value=""/>
             <ne property="method" value=""/>
         </event>
-        <property name="p:processname"/>
+        <event>
+            <eq property="name" value="call"/>
+            <eq property="t:applicationName" value="WebServerExtension"/>
+			<ne property="p:processName" value=""/>
+			<ne property="Usr" value=""/>
+        </event>
+        <property name="Usr"/>
+		<property name="p:processname"/>
+		<property name="t:applicationName"/>
         <property name="context"/>
         <property name="module"/>
         <property name="method"/>
+        <property name="memory"/>
         <property name="memorypeak"/>
         <property name="cputime"/>
         <property name="inbytes"/>
