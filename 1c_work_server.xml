@@ -140,6 +140,32 @@
                     </applications>
                 </item>
                 <item>
+                    <name>[1С/СУБД] ТОП длительности запросов на СУБД</name>
+                    <key>1c.ws.db[{$LOG_DIR},{$TOP_LIST_SIZE}]</key>
+                    <delay>1h</delay>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>[1С] Производительность</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>[1С/СУБД] Суммарная длительность запросов на СУБД</name>
+                    <key>1c.ws.db_summary[{$LOG_DIR}]</key>
+                    <delay>1h</delay>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>[1С] Производительность</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
                     <name>[1С/Рабочий сервер] Ошибки процессов</name>
                     <type>ZABBIX_ACTIVE</type>
                     <key>1c.ws.excps[{$LOG_DIR}]</key>

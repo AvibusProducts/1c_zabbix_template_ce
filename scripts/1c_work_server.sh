@@ -181,6 +181,75 @@ function get_measures_info {
 
 }
 
+function get_db_info_summary {
+
+    echo -e "Длит\t|Кол\t|Сред\t|Макс\t|Контекст"
+
+    put_brack_line
+
+	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null |
+	perl -pe 's/\xef\xbb\xbf//g' |
+	perl -pe 's/\d{2}:\d{2}\.\d{6}-//g' |
+	awk '/,(DBPOSTGRS|DBMSSQL),/' |
+	perl -pe 's/(\d+).*?,p:processName=(.+?)($|,.*$)/$1ϖ$2/' |
+	gawk -F'ϖ' '\
+	{CurDur=$1; Db=$2; \
+	Group=Db; \
+	Dur[Group]+=CurDur; \
+	Execs[Group]+=1; \
+	if(!Max[Group]||Max[Group]<CurDur) Max[Group]=CurDur} END \
+	{Koef=1000 * 1000; \
+	for (Group in Dur) \
+		printf "%.3f\t|%d\t|%.3f\t|%.3f\t|%s\n", \
+			Dur[Group]/Koef, \
+			Execs[Group], \
+			(Dur[Group]/Koef)/Execs[Group], \
+			Max[Group]/Koef, \
+			Group}' |
+	sort -rn |
+	head -n 10
+    
+}
+
+function get_db_info {
+
+    [[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
+
+    echo -e "Длит\t|Кол\t|Сред\t|Макс\t|Контекст"
+
+    put_brack_line
+
+	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null |
+	perl -pe 's/\xef\xbb\xbf//g' |
+	perl -pe 's/\n/@@/g; s/\d{2}:\d{2}\.\d{6}-/\n/g' |
+	awk '/,(DBPOSTGRS|DBMSSQL),/' |
+	perl -pe 's/(\d+).*?,p:processName=(.+?),.*?Context=(.+)($|,.*$)/$1ϖ$2ϖ$3/' |
+	gawk -F'ϖ' '\
+	{CurDur=$1; Db=$2; Cntx=$3; \
+	Group=Db; \
+	countCntx = split($3, valuesCntx, "@@"); \
+	if (countCntx > 0) \
+		if (countCntx == 1) Cntx = valuesCntx[countCntx - 1]; \
+		else Cntx = valuesCntx[countCntx - 2] " --> " valuesCntx[countCntx - 1]; \
+	gsub("(\\s{2,}|\\r)", "", Cntx); \
+	Dur[Group][Cntx]+=CurDur; \
+	Execs[Group][Cntx]+=1; \
+	if(!Max[Group][Cntx]||Max[Group][Cntx]<CurDur*1) Max[Group][Cntx]=CurDur*1} END \
+	{Koef=1000 * 1000; \
+	for (Group in Dur) \
+		for (Cntx in Dur[Group]) \
+		printf "%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
+			Dur[Group][Cntx]/Koef, \
+			Execs[Group][Cntx], \
+			(Dur[Group][Cntx]/Koef)/Execs[Group][Cntx], \
+			Max[Group][Cntx]/Koef, \
+			Group, Cntx}' |
+	sort -rn |
+	head -n "${TOP_LIMIT}" |
+	perl -pe 's/@@/\n/g'
+    
+}
+
 function get_locks_info {
 
     STORE_PERIOD=30 # Срок хранения архивов ТЖ, содержащих информацию о проблемах - 30 дней
@@ -326,6 +395,14 @@ case ${1} in
     measures) check_measures_dir "${2}";
 		export LOG_DIR="${2%/}" ;;&
 	measures) shift 2; get_measures_info "${@}" ;;
+	db_summary) check_log_dir "${2}" "${1}";
+        export LOG_FILE=$(date --date="last hour" "+%y%m%d%H");
+        export LOG_DIR="${2%/}/zabbix/${1}" ;;&
+    db_summary) shift 2; get_db_info_summary "${@}" ;;
+	db) check_log_dir "${2}" "${1}";
+        export LOG_FILE=$(date --date="last hour" "+%y%m%d%H");
+        export LOG_DIR="${2%/}/zabbix/${1}" ;;&
+    db) shift 2; get_db_info "${@}" ;;
 	locks) shift 2; get_locks_info "${@}" ;;
     excps) shift 2; get_excps_info "${@}" ;;
     memory) get_memory_counts ;;

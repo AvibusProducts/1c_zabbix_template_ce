@@ -54,4 +54,23 @@
         <property name="descr"/>
         <property name="context"/>
     </log>
+    <!--<log location="{{tech_logs_dir}}/zabbix/db_summary" history="1">
+		<event>
+			<eq property="name" value="DBPOSTGRS"/>
+		</event>
+		<event>
+			<eq property="name" value="DBMSSQL"/>
+		</event>
+		<property name="p:processName"/>
+	</log>-->
+	<!--<log location="{{tech_logs_dir}}/zabbix/db" history="1">
+		<event>
+			<eq property="name" value="DBPOSTGRS"/>
+		</event>
+		<event>
+			<eq property="name" value="DBMSSQL"/>
+		</event>
+		<property name="p:processName"/>
+		<property name="Context"/>
+	</log>-->
 </config>
