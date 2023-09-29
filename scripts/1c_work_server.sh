@@ -44,7 +44,7 @@ function get_calls_info {
         lazy) echo -e "Отн\t|ОтнСр\t|Длит\t|CPU\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
         dur_avg) echo -e "Сред\t|Длит\t|CPU\t|CPUСр\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
         cpu_avg) echo -e "CPUСр\t|CPU\t|Сред\t|Длит\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
-        memorypeak) echo -e "ОЗУПик\t|ПикСр\t|ОЗУ\t|ОЗУСр\t|Длит\t|Сред\t|Кол\t|Тип\tКонтекст";;
+        memorypeak) echo -e "ОЗУПик\t|ПикСум\t|ОЗУ\t|ОЗУСр\t|Длит\t|Сред\t|Кол\t|Тип\tКонтекст";;
         memory) echo -e "ОЗУ\t|ОЗУСр\t|ОЗУПик\t|ПикСр\t|Длит\t|Сред\t|Кол\t|Тип\tКонтекст";;
 		iobytes) echo -e "СумIO\t|СредIO\t|In\t|Out\t|Длит\t|Сред\t|Кол\t|Тип\tКонтекст";;
         *) error "${ERROR_UNKNOWN_PARAM}" ;;
@@ -52,65 +52,87 @@ function get_calls_info {
 
     put_brack_line
 
-	grep -H "" "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | awk "/CALL,.*(Context|Module|applicationName=WebServerExtension)/" |
+	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | awk "/CALL,.*(Context|Module|applicationName=WebServerExtension)/" |
 	perl -pe 's/\xef\xbb\xbf//g' |
-	# Убираем путь, оставляем имя процесса и очищаем время вызова
-	perl -pe 's/.*\/(.+_\d+)\/.+\.log:(\d{2}:\d{2})\.(\d{6})-(\d+)/$1,$4/g' |
+	perl -pe 's/(\d{2}:\d{2})\.(\d{6})-(\d+)/$3/g' |
 	# Серверные вызовы
-	perl -pe 's/(.+?),(.+?),CALL,.*?p:processName=(.+?),.*?Usr=(.+?),.*?Context=(.*?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$2ϖServerCallϖ$3ϖ$4ϖ$5ϖ$6ϖ$7ϖ$8ϖ$9ϖ$10ϖ$1/' |
+	perl -pe 's/(.+?),CALL,.*?p:processName=(.+?),.*?Usr=(.+?),.*?Context=(.*?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$1ϖServerCallϖ$2ϖ$3ϖ$4ϖ$5ϖ$6ϖ$7ϖ$8ϖ$9/' |
 	# Регламентные задания
-	perl -pe 's/(.+?),(.+?),CALL,.*?Usr=(.+?),.*?p:processName=(.+?),.*?Module=(.+),Method=(.*?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$2ϖBackgroundJobϖ$4ϖ$3ϖ$5.$6ϖ$7ϖ$8ϖ$9ϖ$10ϖ$11ϖ$1/' |
+	perl -pe 's/(.+?),CALL,.*?Usr=(.+?),.*?p:processName=(.+?),.*?Module=(.+),Method=(.*?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$1ϖBackgroundJobϖ$3ϖ$2ϖ$4.$5ϖ$6ϖ$7ϖ$8ϖ$9ϖ$10/' |
 	# Веб-сервисы
-	perl -pe 's/(.+?),(.+?),CALL,.*?p:processName=(.+?),.*?=WebServerExtension.*?,Usr=(.+?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$2ϖWebServerϖ$3ϖ$4ϖWebServerϖ$5ϖ$6ϖ$7ϖ$8ϖ$9ϖ$1/' |
+	perl -pe 's/(.+?),CALL,.*?p:processName=(.+?),.*?=WebServerExtension.*?,Usr=(.+?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$1ϖWebServerϖ$2ϖ$3ϖWebServerϖ$4ϖ$5ϖ$6ϖ$7ϖ$8/' |
 	# Группировка в разрезе пользователя, контекста и имени процесса: удалить из выражения <Group=Db "@" Usr "@" Proc;> ненужные переменные, если группировка не нужна
 	gawk -F'ϖ' -v mode="${MODE}" '\
-		{CurDur=$1; Type=$2; Db=$3; Usr=$4; Cntx="Cntx="$5; Proc=$11; \
+		{CurDur=$1; Type=$2; Db=$3; Usr=$4; Cntx="Cntx="$5; \
 		Group=Type ":" Db; \
 		if (Type=="WebServer") Group=Group ":" Usr; \
 		CurMem=$6; CurMemPeak=$7; CurInBytes=$8; CurOutBytes=$9; CurCpuTime=$10; \
 		Dur[Group][Cntx]+=CurDur; \
 		CpuTime[Group][Cntx]+=CurCpuTime; \
 		Mem[Group][Cntx]+=CurMem; \
-		MemPeak[Group][Cntx]+=CurMemPeak; \
+		if (!MemPeak[Group][Cntx] || MemPeak[Group][Cntx] < CurMemPeak) MemPeak[Group][Cntx]=CurMemPeak; \
 		In[Group][Cntx]+=CurInBytes; \
 		Out[Group][Cntx]+=CurOutBytes; \
 		Execs[Group][Cntx]+=1; \
-		if (CurMem > 0) MemPositive[Group][Cntx]+=CurMem; else MemNegative[Group][Cntx]+=CurMem;} END \
+		} END \
 		{Koef=1000*1000; KoefMem=1024*1024; \
-		for (Group in Dur) { \
-			for (Cntx in Dur[Group]) { \
-				cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
-				if (mode == "count") { \
+		if (mode == "count") { \
+			for (Group in Dur) { \
+				for (Cntx in Dur[Group]) { \
+					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					printf "%d\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cExecs, cDur, cCpuTime, cDur/cExecs, cCpuTime/cExecs, cMemP, cMem, Group, Cntx } \
-				else if (mode == "cpu") { \
+					cExecs, cDur, cCpuTime, cDur/cExecs, cCpuTime/cExecs, cMemP, cMem, Group, Cntx } } } \
+		else if (mode == "cpu") { \
+			for (Group in Dur) { \
+				for (Cntx in Dur[Group]) { \
+					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cCpuTime, cCpuTime/cExecs, cDur, cDur/cExecs, cExecs, cMemP, cMem, Group, Cntx } \
-				else if (mode == "duration") { \
+					cCpuTime, cCpuTime/cExecs, cDur, cDur/cExecs, cExecs, cMemP, cMem, Group, Cntx } } } \
+		else if (mode == "duration") { \
+			for (Group in Dur) { \
+				for (Cntx in Dur[Group]) { \
+					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cDur, cDur/cExecs, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } \
-				else if (mode == "lazy") { \
+					cDur, cDur/cExecs, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } } } \
+		else if (mode == "lazy") { \
+			for (Group in Dur) { \
+				for (Cntx in Dur[Group]) { \
+					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					if (cCpuTime == 0) continue;
 					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cDur/cCpuTime, (cDur/cCpuTime)/cExecs, cDur, cCpuTime, cExecs, cMemP, cMem, Group, Cntx } \
-				else if (mode == "dur_avg") { \
+					cDur/cCpuTime, (cDur/cCpuTime)/cExecs, cDur, cCpuTime, cExecs, cMemP, cMem, Group, Cntx } } } \
+		else if (mode == "dur_avg") { \
+			for (Group in Dur) { \
+				for (Cntx in Dur[Group]) { \
+					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cDur/cExecs, cDur, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } \
-				else if (mode == "cpu_avg") { \
+					cDur/cExecs, cDur, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } } } \
+		else if (mode == "cpu_avg") { \
+			for (Group in Dur) { \
+				for (Cntx in Dur[Group]) { \
+					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cDur/cExecs, cDur, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } \
-				else if (mode == "memorypeak") { \
+					cDur/cExecs, cDur, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } } } \
+		else if (mode == "memorypeak") { \
+			for (Group in Dur) { \
+				for (Cntx in Dur[Group]) { \
+					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%s\t%s\n", \
-					cMemP, cMemP/cExecs, cMem, cMem/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } \
-				else if (mode == "memory") { \
+					cMemP, cMemP/cExecs, cMem, cMem/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } } } \
+		else if (mode == "memory") { \
+			for (Group in Dur) { \
+				for (Cntx in Dur[Group]) { \
+					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%s\t%s\n", \
-					cMem, cMem/cExecs, cMemP, cMemP/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } \
-				else if (mode == "iobytes") { \
+					cMem, cMem/cExecs, cMemP, cMemP/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } } } \
+		else if (mode == "iobytes") { \
+			for (Group in Dur) { \
+				for (Cntx in Dur[Group]) { \
+					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					cIn=In[Group][Cntx]/KoefMem; cOut=Out[Group][Cntx]/KoefMem; \
 					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%s\t%s\n", \
-					cIn+cOut, (cIn+cOut)/cExecs, cIn, cOut, cDur, cCpuTime, cExecs, Group, Cntx } \
-			} \
-		}} ' |
+					cIn+cOut, (cIn+cOut)/cExecs, cIn, cOut, cDur, cCpuTime, cExecs, Group, Cntx } } } \
+		}' |
 	sort -rn | head -n "${TOP_LIMIT}"
     
 }
@@ -189,15 +211,12 @@ function get_db_info_summary {
 
 	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null |
 	perl -pe 's/\xef\xbb\xbf//g' |
-	perl -pe 's/\d{2}:\d{2}\.\d{6}-//g' |
-	awk '/,(DBPOSTGRS|DBMSSQL),/' |
-	perl -pe 's/(\d+).*?,p:processName=(.+?)($|,.*$)/$1ϖ$2/' |
+	perl -pe 's/\d{2}:\d{2}\.\d{6}-(\d+).*?,p:processName=(.+?)($|,.*$)/$1ϖ$2/' |
 	gawk -F'ϖ' '\
 	{CurDur=$1; Db=$2; \
 	Group=Db; \
 	Dur[Group]+=CurDur; \
 	Execs[Group]+=1; \
-	if(!Max[Group]||Max[Group]<CurDur) Max[Group]=CurDur} END \
 	{Koef=1000 * 1000; \
 	for (Group in Dur) \
 		printf "%.3f\t|%d\t|%.3f\t|%.3f\t|%s\n", \
