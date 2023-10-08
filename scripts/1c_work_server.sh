@@ -141,6 +141,8 @@ function get_measures_info {
 
     [[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
 
+	[[ -n ${2} ]] && APDEX_LIST=${2//,/|} || APDEX_LIST="\"?.*"
+
 	ls ${LOG_DIR}/*.xml >/dev/null 2>&1 || error "Нет файлов для обработки"
 
 	echo -e "Apdex\t|Сред\t|Цел\t|Кол\t|Операция"
@@ -153,7 +155,7 @@ function get_measures_info {
 		perl -pe 's/\xef\xbb\xbf//g' | \
 		sed '/<\/prf:/d' | \
 		perl -pe 's/\n/@@/g; s/<prf:KeyOperation/\n<prf:KeyOperation/g' | \
-		awk '/<prf:KeyOperation/' | \
+		awk '/<prf:KeyOperation.*?nameFull="('${APDEX_LIST}')/' | \
 		perl -pe 's/@@.*?measurement value=\"(.+?)\".*?\/>/$1;/g' | \
 		perl -pe 's/.*?targetValue=\"(.+?)\".*?nameFull=\"(.+?)\".*?>/$1ϖ$2ϖ/g' | \
 		perl -pe 's/@@//g' | \
