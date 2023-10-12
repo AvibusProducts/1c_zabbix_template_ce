@@ -331,10 +331,47 @@ function get_locks_info {
 
 function get_excps_info {
 
-    for PROCESS in "${PROCESS_NAMES[@]}"; do
-        EXCP_COUNT=$(cat "${LOG_DIR}"/"${PROCESS}"_*/"${LOG_FILE}.log" 2>/dev/null | grep -c ",EXCP,")
-        echo "${PROCESS}: $([[ -n ${EXCP_COUNT} ]] && echo "${EXCP_COUNT}" || echo 0)"
-    done
+	MODE=${1}
+
+	case ${MODE} in
+        list) shift 1; get_excps_list_info "${@}" ;;
+        *) get_excps_summary_info "${@}" ;;
+    esac
+	
+}
+
+function get_excps_summary_info {
+
+	for PROCESS in "${PROCESS_NAMES[@]}"; do
+		EXCP_COUNT=$(cat "${LOG_DIR}"/"${PROCESS}"_*/"${LOG_FILE}.log" 2>/dev/null | grep -c ",EXCP,")
+		echo "${PROCESS}: $([[ -n ${EXCP_COUNT} ]] && echo "${EXCP_COUNT}" || echo 0)"
+	done
+
+}
+
+function get_excps_list_info {
+
+	[[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
+
+	grep -H "" "${LOG_DIR}"/*/"${LOG_FILE}.log" 2>/dev/null |
+	perl -pe 's/\xef\xbb\xbf//g' |
+	perl -pe 's/^.*\d{8}\.log:$//g' |
+	awk "/^.*[0-9]{8}\.log:/" |
+	perl -pe 's/^.*[\/\\](.*?_\d+)[\/\\]\d{8}\.log:(\d{2}:\d{2})\.(\d{6})-(\d+)/\1,\4/g' |
+	perl -pe 's/^.*\d{8}\.log://g' |
+	perl -pe 's/\n/@@/g; s/(.+?_\d+)/\n\1/g' |
+	awk '/,EXCP,.+Descr=.+/' |
+	perl -pe 's/(.+?)_(.+?),.*?Descr=(.*?)($|,.*$)$/\1ϖ\2ϖ\3/' |
+	gawk -F'ϖ' '\
+		{Proc=$1; ProcID=$2; Descr=$3; \
+		Group=Proc "\t" Descr; \
+		Execs[Group]+=1; } END \
+		{for (Group in Execs) \
+			printf "%d@@%s\n", Execs[Group], Group}' |
+	sort -rn |
+	head -n "${TOP_LIMIT}" |
+	perl -pe 's/@@/\n\t/g'
+	
 }
 
 function get_memory_counts {
@@ -426,7 +463,7 @@ case ${1} in
     db) shift 2; get_db_info "${@}" ;;
 	locks) shift 2; get_locks_info "${@}" ;;
     excps) shift 2; get_excps_info "${@}" ;;
-    memory) get_memory_counts ;;
+	memory) get_memory_counts ;;
     ram) get_physical_memory ;;
     dump_logs) shift; dump_logs "${@}" ;;
     perfomance) shift; make_ras_params "${@}"; get_available_perfomance ;;
