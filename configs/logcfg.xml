@@ -1,60 +1,68 @@
 <config xmlns="http://v8.1c.ru/v8/tech-log">
     <dump create="false"/>
     <log location="{{tech_logs_dir}}/zabbix/locks" history="1">
-        <event>
-            <eq property="name" value="tlock"/>
-        </event>
-        <event>
-            <eq property="name" value="ttimeout"/>
-        </event>
-        <event>
-            <eq property="name" value="tdeadlock"/>
-        </event>
-        <property name="p:processname"/>
-        <property name="t:connectid"/>
-        <property name="waitconnections"/>
-        <property name="deadlockconnectionintersections"/>
-        <property name="regions"/>
-        <property name="locks"/>
-        <property name="context"/>
-    </log>
-    <log location="{{tech_logs_dir}}/zabbix/calls" history="1">
-        <event>
-            <eq property="name" value="call"/>
-            <ne property="context" value=""/>
-        </event>
-        <event>
-            <eq property="name" value="call"/>
-            <ne property="module" value=""/>
-            <ne property="method" value=""/>
-        </event>
-        <event>
-            <eq property="name" value="call"/>
-            <eq property="t:applicationName" value="WebServerExtension"/>
+		<event>
+			<eq property="name" value="tlock"/>
+		</event>
+		<event>
+			<eq property="name" value="ttimeout"/>
+		</event>
+		<event>
+			<eq property="name" value="tdeadlock"/>
+		</event>
+		<property name="p:processname"/>
+		<property name="t:connectid"/>
+		<property name="waitconnections"/>
+		<property name="deadlockconnectionintersections"/>
+		<property name="regions"/>
+		<property name="locks"/>
+		<property name="context"/>
+	</log>
+	<log location="{{tech_logs_dir}}/zabbix/calls" history="1">
+		<event>
+			<eq property="name" value="call"/>
+			<ne property="context" value=""/>
+		</event>
+		<event>
+			<eq property="name" value="call"/>
+			<ne property="module" value=""/>
+			<ne property="method" value=""/>
+		</event>
+		<event>
+		<eq property="name" value="call"/>
+		<eq property="t:applicationName" value="WebServerExtension"/>
 			<ne property="p:processName" value=""/>
 			<ne property="Usr" value=""/>
-        </event>
-        <property name="Usr"/>
+		</event>
+		<property name="Usr"/>
 		<property name="p:processname"/>
 		<property name="t:applicationName"/>
-        <property name="context"/>
-        <property name="module"/>
-        <property name="method"/>
-        <property name="memory"/>
-        <property name="memorypeak"/>
-        <property name="cputime"/>
-        <property name="inbytes"/>
-        <property name="outbytes"/>
+		<property name="context"/>
+		<property name="module"/>
+		<property name="method"/>
+		<property name="memory"/>
+		<property name="memorypeak"/>
+		<property name="cputime"/>
+		<property name="inbytes"/>
+		<property name="outbytes"/>
+	</log>
+	<log location="{{tech_logs_dir}}/zabbix/excps" history="1">
+		<event>
+			<eq property="name" value="excp"/>
+		</event>
+		<property name="p:processname"/>
+		<property name="descr"/>
+		<property name="context"/>
     </log>
-    <log location="{{tech_logs_dir}}/zabbix/excps" history="1">
-        <event>
-            <eq property="name" value="excp"/>
-        </event>
-        <property name="p:processname"/>
-        <property name="descr"/>
-        <property name="context"/>
-    </log>
-    <!--<log location="{{tech_logs_dir}}/zabbix/db_summary" history="1">
+	<log location="{{tech_logs_dir}}/zabbix/cluster" history="1">
+		<event>
+			<eq property="name" value="attn"/>
+		</event>
+		<property name="p:processname"/>
+		<property name="descr"/>
+		<property name="context"/>
+	</log>
+	<!--<log location="{{tech_logs_dir}}/zabbix/db_summary" history="1">
 		<event>
 			<eq property="name" value="DBPOSTGRS"/>
 		</event>
@@ -62,13 +70,17 @@
 			<eq property="name" value="DBMSSQL"/>
 		</event>
 		<property name="p:processName"/>
-	</log>-->
-	<!--<log location="{{tech_logs_dir}}/zabbix/db" history="1">
+	</log>
+	<log location="{{tech_logs_dir}}/zabbix/db" history="1">
 		<event>
 			<eq property="name" value="DBPOSTGRS"/>
+			<ne property="Context" value=""/>
+			<ge property="Duration" value="1000000"/>
 		</event>
 		<event>
 			<eq property="name" value="DBMSSQL"/>
+			<ne property="Context" value=""/>
+			<ge property="Duration" value="1000000"/>
 		</event>
 		<property name="p:processName"/>
 		<property name="Context"/>

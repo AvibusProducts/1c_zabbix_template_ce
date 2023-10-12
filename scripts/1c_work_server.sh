@@ -2,10 +2,6 @@
 #
 # Мониторинг 1С Предприятия 8.3 (рабочий сервер)
 #
-# (c) 2019-2023, Алексей Ю. Федотов
-#
-# Email: fedotov@kaminsoft.ru
-#
 #set -x
 
 WORK_DIR=$(dirname "${0}" | sed -r 's/\\/\//g; s/^(.{1}):/\/\1/')
@@ -52,7 +48,7 @@ function get_calls_info {
 
     put_brack_line
 
-	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | awk "/CALL,.*(Context|Module|applicationName=WebServerExtension)/" |
+	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | awk "/CALL,.*?(Context|Module|applicationName=WebServerExtension)/" |
 	perl -pe 's/\xef\xbb\xbf//g' |
 	perl -pe 's/(\d{2}:\d{2})\.(\d{6})-(\d+)/$3/g' |
 	# Серверные вызовы
@@ -61,7 +57,6 @@ function get_calls_info {
 	perl -pe 's/(.+?),CALL,.*?Usr=(.+?),.*?p:processName=(.+?),.*?Module=(.+),Method=(.*?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$1ϖBackgroundJobϖ$3ϖ$2ϖ$4.$5ϖ$6ϖ$7ϖ$8ϖ$9ϖ$10/' |
 	# Веб-сервисы
 	perl -pe 's/(.+?),CALL,.*?p:processName=(.+?),.*?=WebServerExtension.*?,Usr=(.+?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$1ϖWebServerϖ$2ϖ$3ϖWebServerϖ$4ϖ$5ϖ$6ϖ$7ϖ$8/' |
-	# Группировка в разрезе пользователя, контекста и имени процесса: удалить из выражения <Group=Db "@" Usr "@" Proc;> ненужные переменные, если группировка не нужна
 	gawk -F'ϖ' -v mode="${MODE}" '\
 		{CurDur=$1; Type=$2; Db=$3; Usr=$4; Cntx="Cntx="$5; \
 		Group=Type ":" Db; \
@@ -70,10 +65,12 @@ function get_calls_info {
 		Dur[Group][Cntx]+=CurDur; \
 		CpuTime[Group][Cntx]+=CurCpuTime; \
 		Mem[Group][Cntx]+=CurMem; \
-		if (!MemPeak[Group][Cntx] || MemPeak[Group][Cntx] < CurMemPeak) MemPeak[Group][Cntx]=CurMemPeak; \
-		In[Group][Cntx]+=CurInBytes; \
-		Out[Group][Cntx]+=CurOutBytes; \
 		Execs[Group][Cntx]+=1; \
+		if (!MemPeak[Group][Cntx] || MemPeak[Group][Cntx] < CurMemPeak) MemPeak[Group][Cntx]=CurMemPeak; \
+		if (mode == "iobytes") { \
+			In[Group][Cntx]+=CurInBytes; \
+			Out[Group][Cntx]+=CurOutBytes; \
+		} \
 		} END \
 		{Koef=1000*1000; KoefMem=1024*1024; \
 		if (mode == "count") { \
@@ -145,17 +142,17 @@ function get_measures_info {
 
 	ls ${LOG_DIR}/*.xml >/dev/null 2>&1 || error "Нет файлов для обработки"
 
+	FILE_MASK=$(find "${LOG_DIR}"/*.xml -maxdepth 1 -type f -print | tail -n 1 | sed -r "s/.*?([0-9\-]{10}\s[0-9\-]{8}).*\.xml/\1/" 2>/dev/null)
+
 	echo -e "Apdex\t|Сред\t|Цел\t|Кол\t|Операция"
 
 	put_brack_line
 
-	mv "${LOG_DIR}"/*.xml "${LOG_DIR}"/inprocess 2>/dev/null
-
-	RESULT=$(cat "${LOG_DIR}"/inprocess/*.xml 2>/dev/null | \
+	RESULT=$(grep "" "${LOG_DIR}"/"${FILE_MASK}"*.xml 2>/dev/null | \
 		perl -pe 's/\xef\xbb\xbf//g' | \
 		sed '/<\/prf:/d' | \
 		perl -pe 's/\n/@@/g; s/<prf:KeyOperation/\n<prf:KeyOperation/g' | \
-		awk '/<prf:KeyOperation.*?nameFull="('${APDEX_LIST}')/' | \
+		awk '/<prf:KeyOperation.*?nameFull=".*?('${APDEX_LIST}')/' | \
 		perl -pe 's/@@.*?measurement value=\"(.+?)\".*?\/>/$1;/g' | \
 		perl -pe 's/.*?targetValue=\"(.+?)\".*?nameFull=\"(.+?)\".*?>/$1ϖ$2ϖ/g' | \
 		perl -pe 's/@@//g' | \
@@ -199,13 +196,10 @@ function get_measures_info {
 			}' | \
 		sort -n | head -n "${TOP_LIMIT}")
 	echo "${RESULT}"
-	
-	rm "${LOG_DIR}"/processed/* 2>/dev/null
-	mv "${LOG_DIR}"/inprocess/*.xml "${LOG_DIR}"/processed 2>/dev/null
 
 }
 
-function get_db_info_summary {
+function get_db_summary_info {
 
     echo -e "Длит\t|Кол\t|Сред\t|Макс\t|Контекст"
 
@@ -228,11 +222,11 @@ function get_db_info_summary {
 			Max[Group]/Koef, \
 			Group}' |
 	sort -rn |
-	head -n 10
+	head -n "${TOP_LIMIT}"
     
 }
 
-function get_db_info {
+function get_db_list_info {
 
     [[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
 
@@ -361,13 +355,38 @@ function get_excps_list_info {
 	perl -pe 's/^.*\d{8}\.log://g' |
 	perl -pe 's/\n/@@/g; s/(.+?_\d+)/\n\1/g' |
 	awk '/,EXCP,.+Descr=.+/' |
-	perl -pe 's/(.+?)_(.+?),.*?Descr=(.*?)($|,.*$)$/\1ϖ\2ϖ\3/' |
+	perl -pe 's/(.+?)_(.+?),.*?Descr=(.*?)($|,.*$)/\1ϖ\2ϖ\3/' |
 	gawk -F'ϖ' '\
 		{Proc=$1; ProcID=$2; Descr=$3; \
 		Group=Proc "\t" Descr; \
 		Execs[Group]+=1; } END \
 		{for (Group in Execs) \
-			printf "%d@@%s\n", Execs[Group], Group}' |
+			printf "%d\t%s\n", Execs[Group], Group}' |
+	sort -rn |
+	head -n "${TOP_LIMIT}" |
+	perl -pe 's/@@/\n\t/g'
+	
+}
+
+function get_cluster_events_info {
+
+	[[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
+
+	grep -H "" "${LOG_DIR}"/*/"${LOG_FILE}.log" 2>/dev/null |
+	perl -pe 's/\xef\xbb\xbf//g' |
+	perl -pe 's/^.*\d{8}\.log:$//g' |
+	awk "/^.*[0-9]{8}\.log:/" |
+	perl -pe 's/^.*[\/\\](.*?_\d+)[\/\\]\d{8}\.log:(\d{2}:\d{2})\.(\d{6})-(\d+)/\1,\4/g' |
+	perl -pe 's/^.*\d{8}\.log://g' |
+	perl -pe 's/\n/@@/g; s/(.+?_\d+)/\n\1/g' |
+	awk '/,Descr=.+/' |
+	perl -pe 's/(.+?)_\d+?,\d+,(\w+),.*?Descr=(.*?)($|,.*$)/\1ϖ\2ϖ\3/' |
+	gawk -F'ϖ' '\
+		{Proc=$1; Event=$2; Descr=$3; \
+		Group=Proc "\\" Event "\t" Descr; \
+		Execs[Group]+=1; } END \
+		{for (Group in Execs) \
+			printf "%d\t%s\n", Execs[Group], Group}' |
 	sort -rn |
 	head -n "${TOP_LIMIT}" |
 	perl -pe 's/@@/\n\t/g'
@@ -445,7 +464,7 @@ function get_available_perfomance {
 }
 
 case ${1} in
-    calls | locks | excps) check_log_dir "${2}" "${1}";
+    calls | locks | excps | cluster) check_log_dir "${2}" "${1}";
         export LOG_FILE=$(date --date="last hour" "+%y%m%d%H");
         export LOG_DIR="${2%/}/zabbix/${1}" ;;&
     excps) PROCESS_NAMES=(ragent rmngr rphost) ;;&
@@ -463,6 +482,7 @@ case ${1} in
     db) shift 2; get_db_info "${@}" ;;
 	locks) shift 2; get_locks_info "${@}" ;;
     excps) shift 2; get_excps_info "${@}" ;;
+	cluster) shift 2; get_cluster_events_info "${@}" ;;
 	memory) get_memory_counts ;;
     ram) get_physical_memory ;;
     dump_logs) shift; dump_logs "${@}" ;;
