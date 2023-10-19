@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>6.0</version>
-    <date>2023-10-19T18:31:34Z</date>
+    <date>2023-10-19T19:07:57Z</date>
     <groups>
         <group>
             <uuid>d83f326f893144b0b86d0e7c36a5b1d9</uuid>
@@ -29,6 +29,188 @@
                 </group>
             </groups>
             <items>
+                <item>
+                    <uuid>be99ca804daf49ffb4a7956cf5327cdd</uuid>
+                    <name>[1С/Серверные вызовы] Количество операций</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.calls.count</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>(\d+).*?!Общ</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.calls[{$LOG_DIR},count,{$TOP_LIST_SIZE}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>16827ffda79e4b41bbfbbdafbd409161</uuid>
+                    <name>[1С/Серверные вызовы] Общая нагрузка CPU</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.calls.cpu</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>(\d+\.\d*).*?!Общ</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.calls[{$LOG_DIR},cpu,{$TOP_LIST_SIZE}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>2882fe14000a40c1b96dc3b46fd57b9a</uuid>
+                    <name>[1С/Серверные вызовы] Суммарная длительность операций</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.calls.duration</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>(\d+\.\d*).*?!Общ</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.calls[{$LOG_DIR},duration,{$TOP_LIST_SIZE}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>13992aabe9da42ea9fa7f06e056d8b83</uuid>
+                    <name>[1С/Серверные вызовы] Средняя длительность операций</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.calls.durationavg</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>(\d+\.\d*).*?!Общ</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.calls[{$LOG_DIR},dur_avg,{$TOP_LIST_SIZE}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>e05803c8250346cc80434e3a295e5516</uuid>
+                    <name>[1С/Серверные вызовы] &quot;Ленивые&quot; вызовы</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.calls.lazy</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>(\d+\.\d*).*?!Общ</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.calls[{$LOG_DIR},lazy,{$TOP_LIST_SIZE}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>882fb21d07e94b2b85cb5a46e5481e4a</uuid>
+                    <name>[1С/Серверные вызовы] Не освобожденная память</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.calls.memory</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>(\d+\.\d*).*?!Общ</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.calls[{$LOG_DIR},memory,{$TOP_LIST_SIZE}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>81e3be3112bf43ef8428457ebd1f0132</uuid>
+                    <name>[1С/Серверные вызовы] Максимальная память за вызов</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.calls.memorypeak</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>(\d+\.\d*).*?!Макс</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.calls[{$LOG_DIR},memorypeak,{$TOP_LIST_SIZE}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
                 <item>
                     <uuid>05139c6b93a74d948a46e0b35a0cad9d</uuid>
                     <name>[1С/Серверные вызовы] ТОП по суммарному количеству</name>

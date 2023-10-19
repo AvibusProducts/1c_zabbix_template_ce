@@ -34,21 +34,21 @@ function get_calls_info {
     [[ -n ${2} ]] && TOP_LIMIT=${2} || TOP_LIMIT=25
 
     case ${MODE} in
-        count) echo -e "Кол\t|Длит\t|CPU\t|Сред\t|CPUСр\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
-        cpu) echo -e "CPU\t|CPUСр\t|Длит\t|Сред\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
-        duration) echo -e "Длит\t|Сред\t|CPU\t|CPUСр\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
-        lazy) echo -e "Отн\t|ОтнСр\t|Длит\t|CPU\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
-        dur_avg) echo -e "Сред\t|Длит\t|CPU\t|CPUСр\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
-        cpu_avg) echo -e "CPUСр\t|CPU\t|Сред\t|Длит\t|Кол\t|ОЗУПик\t|ОЗУ\t|Тип\tКонтекст";;
-        memorypeak) echo -e "ОЗУПик\t|ПикСум\t|ОЗУ\t|ОЗУСр\t|Длит\t|Сред\t|Кол\t|Тип\tКонтекст";;
-        memory) echo -e "ОЗУ\t|ОЗУСр\t|ОЗУПик\t|ПикСр\t|Длит\t|Сред\t|Кол\t|Тип\tКонтекст";;
-		iobytes) echo -e "СумIO\t|СредIO\t|In\t|Out\t|Длит\t|Сред\t|Кол\t|Тип\tКонтекст";;
+        count) printf "%10s|%12s|%12s|%12s|%12s|%12s|%12s|%s\t%s\n" "Count" "Duration" "CPU" "AvgDuration" "AvgCPU" "PeakRAM" "RAM" "Context";;
+        cpu) printf "%12s|%12s|%12s|%12s|%10s|%12s|%12s|%s\t%s\n" "CPU" "AvgCPU" "Duration" "AvgDuration" "Count" "PeakRAM" "RAM" "Context";;
+        duration) printf "%12s|%12s|%12s|%12s|%10s|%12s|%12s|%s\n" "Duration" "AvgDuration" "CPU" "AvgCPU" "Count" "PeakRAM" "RAM" "Context";;
+        lazy) printf "%12s|%12s|%12s|%12s|%10s|%12s|%12s|%s\t%s\n" "Dur/CPU" "AvgDur/AvgCPU" "Duration" "CPU" "Count" "PeakRAM" "RAM" "Context";;
+        dur_avg) printf "%12s|%12s|%12s|%12s|%10s|%12s|%12s|%s\t%s\n" "AvgDuration" "Duration" "CPU" "AvgCPU" "Count" "PeakRAM" "RAM" "Context";;
+        cpu_avg) printf "%12s|%12s|%12s|%12s|%10s|%12s|%12s|%s\t%s\n" "AvgCPU" "CPU" "AvgDuration" "Duration" "Count" "PeakRAM" "RAM" "Context";;
+        memorypeak) printf "%12s|%12s|%12s|%12s|%12s|%12s|%10s|%s\t%s\n" "PeakRAM" "PeakSumRAM" "RAM" "AvgRAM" "Duration" "AvgDuration" "Count" "Context";;
+        memory) printf "%12s|%12s|%12s|%12s|%12s|%12s|%10s|%s\t%s\n" "RAM" "AvgRAM" "PeakRAM" "AvgPeakRAM" "Duration" "AvgDuration" "Count" "Context";;
+		iobytes) printf "%12s|%12s|%12s|%12s|%12s|%12s|%10s|%s\t%s\n" "SumIO" "AvgIO" "Input" "Output" "Duration" "AvgDuration" "Count" "Context";;
         *) error "${ERROR_UNKNOWN_PARAM}" ;;
     esac
 
-    put_brack_line
+    put_brack_line 150
 
-	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | awk "/CALL,.*?(Context|Module|applicationName=WebServerExtension)/" |
+	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | awk "/CALL,.*?(Context|Module|applicationName=Web)/" |
 	perl -pe 's/\xef\xbb\xbf//g' |
 	perl -pe 's/(\d{2}:\d{2})\.(\d{6})-(\d+)/$3/g' |
 	# Серверные вызовы
@@ -72,65 +72,95 @@ function get_calls_info {
 			Out[Group][Cntx]+=CurOutBytes; \
 		} \
 		} END \
-		{Koef=1000*1000; KoefMem=1024*1024; \
+		{Koef=1000*1000; KoefMem=1024*1024; Summary=0; \
 		if (mode == "count") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
-					printf "%d\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cExecs, cDur, cCpuTime, cDur/cExecs, cCpuTime/cExecs, cMemP, cMem, Group, Cntx } } } \
+					Summary+=cExecs; \
+					printf "%10d|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%s\t%s\n", \
+					cExecs, cDur, cCpuTime, cDur/cExecs, cCpuTime/cExecs, cMemP, cMem, Group, Cntx } } \
+			printf "9999999999_%10d|\t%s\n", Summary, "!Общее количество операций"; \
+		} \
 		else if (mode == "cpu") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
-					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cCpuTime, cCpuTime/cExecs, cDur, cDur/cExecs, cExecs, cMemP, cMem, Group, Cntx } } } \
+					Summary+=cCpuTime; \
+					printf "%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
+					cCpuTime, cCpuTime/cExecs, cDur, cDur/cExecs, cExecs, cMemP, cMem, Group, Cntx } } \
+			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общая нагрузка CPU"; \
+		} \
 		else if (mode == "duration") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
-					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cDur, cDur/cExecs, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } } } \
+					Summary+=cDur; \
+					printf "%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
+					cDur, cDur/cExecs, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } } \
+			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общая длительность операций"; \
+		} \
 		else if (mode == "lazy") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
-					if (cCpuTime == 0) continue;
-					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cDur/cCpuTime, (cDur/cCpuTime)/cExecs, cDur, cCpuTime, cExecs, cMemP, cMem, Group, Cntx } } } \
+					if (cCpuTime == 0) continue; \
+					SummaryD+=cDur; SummaryC+=cCpuTime; \
+					printf "%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
+					cDur/cCpuTime, (cDur/cCpuTime)/cExecs, cDur, cCpuTime, cExecs, cMemP, cMem, Group, Cntx } } \
+			if (SummaryC > 0) Summary=SummaryD/SummaryC;
+			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общее соотношение Duration/CPU"; \
+		} \
 		else if (mode == "dur_avg") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
-					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cDur/cExecs, cDur, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } } } \
+					SummaryD+=cDur; SummaryE+=cExecs; \
+					printf "%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
+					cDur/cExecs, cDur, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } } \
+			if (SummaryE > 0) Summary=SummaryD/SummaryE;
+			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общее среднее время операций"; \
+		} \
 		else if (mode == "cpu_avg") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
-					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
-					cDur/cExecs, cDur, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } } } \
+					SummaryD+=cDur; SummaryE+=cExecs; \
+					printf "%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
+					cCpuTime/cExecs, cCpuTime, cDur, cDur/cExecs, cExecs, cMemP, cMem, Group, Cntx } } \
+			if (SummaryE > 0) Summary=SummaryD/SummaryE;
+			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общая средняя нагрузка операций на CPU"; \
+		} \
 		else if (mode == "memorypeak") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
-					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%s\t%s\n", \
-					cMemP, cMemP/cExecs, cMem, cMem/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } } } \
+					if (Summary < cMemP) Summary=cMemP; \
+					printf "%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%10d|%s\t%s\n", \
+					cMemP, cMemP/cExecs, cMem, cMem/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } } \
+			printf "9999999999_%12.3f|\t%s\n", Summary, "!Максимальная потребленная память за вызов"; \
+		} \
 		else if (mode == "memory") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
-					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%s\t%s\n", \
-					cMem, cMem/cExecs, cMemP, cMemP/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } } } \
+					Summary+=cMem; \
+					printf "%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%10d|%s\t%s\n", \
+					cMem, cMem/cExecs, cMemP, cMemP/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } } \
+			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общая не освобожденная память"; \
+		} \
 		else if (mode == "iobytes") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					cIn=In[Group][Cntx]/KoefMem; cOut=Out[Group][Cntx]/KoefMem; \
-					printf "%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%.3f\t|%d\t|%s\t%s\n", \
-					cIn+cOut, (cIn+cOut)/cExecs, cIn, cOut, cDur, cCpuTime, cExecs, Group, Cntx } } } \
+					Summary+=(cIn+cOut); \
+					printf "%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%10d|%s\t%s\n", \
+					cIn+cOut, (cIn+cOut)/cExecs, cIn, cOut, cDur, cCpuTime, cExecs, Group, Cntx } } \
+			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общая сумма ввода-вывода"; \
+		} \
 		}' |
-	sort -rn | head -n "${TOP_LIMIT}"
+	sort -rn | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//' 
     
 }
 
@@ -403,7 +433,7 @@ function get_excps_list_info {
 	awk "/^.*[0-9]{8}\.log:/" |
 	perl -pe 's/^.*[\/\\](.*?_\d+)[\/\\]\d{8}\.log:(\d{2}:\d{2})\.(\d{6})-(\d+)/\1,\4/g' |
 	perl -pe 's/^.*\d{8}\.log://g' |
-	perl -pe 's/\n/@@/g; s/(.+?_\d+)/\n\1/g' |
+	perl -pe 's/[\r\n]+/@@/g; s/(.+?_\d+)/\n\1/g' |
 	awk '/,EXCP,.+Descr=.+/' |
 	perl -pe 's/(.+?)_(.+?),.*?Descr=(.*?)($|,.*$)/\1ϖ\2ϖ\3/' |
 	gawk -F'ϖ' '\
@@ -428,7 +458,7 @@ function get_cluster_events_info {
 	awk "/^.*[0-9]{8}\.log:/" |
 	perl -pe 's/^.*[\/\\](.*?_\d+)[\/\\]\d{8}\.log:(\d{2}:\d{2})\.(\d{6})-(\d+)/\1,\4/g' |
 	perl -pe 's/^.*\d{8}\.log://g' |
-	perl -pe 's/\n/@@/g; s/(.+?_\d+)/\n\1/g' |
+	perl -pe 's/[\r\n]+/@@/g; s/(.+?_\d+)/\n\1/g' |
 	awk '/,Descr=.+/' |
 	perl -pe 's/(.+?)_\d+?,\d+,(\w+),.*?Descr=(.*?)($|,.*$)/\1ϖ\2ϖ\3/' |
 	gawk -F'ϖ' '\
