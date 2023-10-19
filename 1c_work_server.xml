@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>6.0</version>
-    <date>2023-10-12T18:26:40Z</date>
+    <date>2023-10-19T18:31:34Z</date>
     <groups>
         <group>
             <uuid>d83f326f893144b0b86d0e7c36a5b1d9</uuid>
@@ -33,7 +33,7 @@
                     <uuid>05139c6b93a74d948a46e0b35a0cad9d</uuid>
                     <name>[1С/Серверные вызовы] ТОП по суммарному количеству</name>
                     <key>1c.ws.calls[{$LOG_DIR},count,{$TOP_LIST_SIZE}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m4s30</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <tags>
@@ -47,7 +47,7 @@
                     <uuid>83c84a6d35fa4c98ba89df320ad6328e</uuid>
                     <name>[1С/Серверные вызовы] ТОП по суммарному процессорному времени</name>
                     <key>1c.ws.calls[{$LOG_DIR},cpu,{$TOP_LIST_SIZE}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m1s30</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <tags>
@@ -61,7 +61,7 @@
                     <uuid>83fa74a638374e9da0e72c7d96e84e48</uuid>
                     <name>[1С/Серверные вызовы] ТОП по суммарной длительности</name>
                     <key>1c.ws.calls[{$LOG_DIR},duration,{$TOP_LIST_SIZE}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m1</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <tags>
@@ -75,7 +75,7 @@
                     <uuid>b1bf54b9a2e54522b1c70ad9b27a0826</uuid>
                     <name>[1С/Серверные вызовы] ТОП по средней длительности</name>
                     <key>1c.ws.calls[{$LOG_DIR},dur_avg,{$TOP_LIST_SIZE}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m2</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <tags>
@@ -89,7 +89,7 @@
                     <uuid>62ce6a75690a42dc925986c707bca26f</uuid>
                     <name>[1С/Серверные вызовы] ТОП по суммарному вводу-выводу</name>
                     <key>1c.ws.calls[{$LOG_DIR},iobytes,{$TOP_LIST_SIZE}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m4</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <tags>
@@ -103,7 +103,7 @@
                     <uuid>222b2f6af6c64274be9d561a52e101de</uuid>
                     <name>[1С/Серверные вызовы] ТОП &quot;ленивых&quot; вызовов</name>
                     <key>1c.ws.calls[{$LOG_DIR},lazy,{$TOP_LIST_SIZE}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m3s30</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <tags>
@@ -117,7 +117,7 @@
                     <uuid>d51ede9cc800424f9e0ed59f0cce7f92</uuid>
                     <name>[1С/Серверные вызовы] ТОП по не освобожденной памяти за вызов</name>
                     <key>1c.ws.calls[{$LOG_DIR},memory,{$TOP_LIST_SIZE}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m2s30</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <tags>
@@ -131,7 +131,7 @@
                     <uuid>5e66e84d5f3d4375a6c220b16051a85a</uuid>
                     <name>[1С/Серверные вызовы] ТОП по максимальной памяти за вызов</name>
                     <key>1c.ws.calls[{$LOG_DIR},memorypeak,{$TOP_LIST_SIZE}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m3</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <tags>
@@ -163,7 +163,7 @@
                     <uuid>92c60fc85200490cb5bf6c1edee59aaf</uuid>
                     <name>[1С/СУБД] ТОП длительности запросов на СУБД</name>
                     <key>1c.ws.db[{$LOG_DIR},{$TOP_LIST_SIZE}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m1</delay>
                     <trends>0</trends>
                     <status>DISABLED</status>
                     <value_type>TEXT</value_type>
@@ -178,7 +178,7 @@
                     <uuid>142d05cc1a104de2aecebd5cc49110d7</uuid>
                     <name>[1С/СУБД] Суммарная длительность запросов на СУБД</name>
                     <key>1c.ws.db_summary[{$LOG_DIR}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m1</delay>
                     <trends>0</trends>
                     <status>DISABLED</status>
                     <value_type>TEXT</value_type>
@@ -212,7 +212,7 @@
                     <name>[1С/Рабочий сервер] Ошибки процессов</name>
                     <type>ZABBIX_ACTIVE</type>
                     <key>1c.ws.excps[{$LOG_DIR}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m2</delay>
                     <history>0</history>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -294,6 +294,60 @@
                     </triggers>
                 </item>
                 <item>
+                    <uuid>0eb8eee98c724fe2b7182ceb0d93c1c3</uuid>
+                    <name>[1С/Блокировки] Общее время блокировок</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.locks.lock_duration</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>s</units>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>(\d+\.\d*).*?!Общ.*?\|</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.locks[{$LOG_DIR},{$MAX_LOCK_WAIT},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS},list,{$TOP_LIST_SIZE}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Управляемые блокировки</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>6916f03faabb4958b2cc1adb976c5a40</uuid>
+                    <name>[1С/Блокировки] Общее время ожидания блокировок</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.locks.lock_wait_duration</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>s</units>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>\|.*?(\d+\.\d*).*?!Общ</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.locks[{$LOG_DIR},{$MAX_LOCK_WAIT},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS},list,{$TOP_LIST_SIZE}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Управляемые блокировки</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
                     <uuid>83118d60d0a6434f81f06f31796bd694</uuid>
                     <name>[1С/Блокировки] Число таймаутов</name>
                     <type>DEPENDENT</type>
@@ -332,6 +386,7 @@
                     <type>DEPENDENT</type>
                     <key>1c.ws.locks.wait</key>
                     <delay>0</delay>
+                    <status>DISABLED</status>
                     <value_type>FLOAT</value_type>
                     <units>s</units>
                     <preprocessing>
@@ -362,10 +417,28 @@
                     </triggers>
                 </item>
                 <item>
+                    <uuid>c07ad83d27e342c9bf27fb8ed6508f75</uuid>
+                    <name>[1С/Блокировки] ТОП блокировок</name>
+                    <key>1c.ws.locks[{$LOG_DIR},{$MAX_LOCK_WAIT},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS},list,{$TOP_LIST_SIZE}]</key>
+                    <delay>0;m2</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Информация</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Управляемые блокировки</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
                     <uuid>c71390ea9c9d410288c17e9c56de78c2</uuid>
                     <name>[1С/Блокировки] Сводка</name>
                     <key>1c.ws.locks[{$LOG_DIR},{$MAX_LOCK_WAIT},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
-                    <delay>1h</delay>
+                    <delay>0;m1</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <tags>
@@ -430,7 +503,7 @@
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE},{$APDEX_LIST_WEB}]</key>
+                        <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE},{$APDEX_LIST_CLN}]</key>
                     </master_item>
                     <tags>
                         <tag>
@@ -438,6 +511,14 @@
                             <value>[1С] Производительность</value>
                         </tag>
                     </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>aa7fc39b1ce9443597753739c7b00b58</uuid>
+                            <expression>last(/Template App 1C Enterprise Work Server/1c.ws.measures.apdex_cln)&lt;{$MIN_APDEX_CLN}</expression>
+                            <name>[1С/APDEX] Общее значение APDEX пользовательских операций ниже допустимого</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
                 </item>
                 <item>
                     <uuid>a757f406c9e94d86a36a448710ef1d38</uuid>
@@ -464,6 +545,14 @@
                             <value>[1С] Производительность</value>
                         </tag>
                     </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>67453ef6cf45422f934b9d85fe8798d7</uuid>
+                            <expression>last(/Template App 1C Enterprise Work Server/1c.ws.measures.apdex_web)&lt;{$MIN_APDEX_WEB}</expression>
+                            <name>[1С/APDEX] Общее значение APDEX WEB-операций ниже допустимого</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
                 </item>
                 <item>
                     <uuid>c545ffdb96e3499cb10e4e886e1f25fe</uuid>
@@ -848,7 +937,7 @@
             <macros>
                 <macro>
                     <macro>{$APDEX_LIST_CLN}</macro>
-                    <value>РМК</value>
+                    <value>РМК,ЗаказКлиента</value>
                     <description>Список пользовательских ключевых операций</description>
                 </macro>
                 <macro>
@@ -879,7 +968,17 @@
                 <macro>
                     <macro>{$MIN_APDEX}</macro>
                     <value>0.85</value>
-                    <description>Минимальное допустимое значение APDEX</description>
+                    <description>Минимальное допустимое значение общего APDEX</description>
+                </macro>
+                <macro>
+                    <macro>{$MIN_APDEX_CLN}</macro>
+                    <value>0.85</value>
+                    <description>Минимальное допустимое значение APDEX пользовательских операций</description>
+                </macro>
+                <macro>
+                    <macro>{$MIN_APDEX_WEB}</macro>
+                    <value>0.7</value>
+                    <description>Минимальное допустимое значение APDEX WEB операций</description>
                 </macro>
                 <macro>
                     <macro>{$RAS_PASS}</macro>

@@ -267,6 +267,17 @@ function get_db_list_info {
 
 function get_locks_info {
 
+	MODE=${4}
+
+	case ${MODE} in
+        list) shift 4; get_locks_list_info "${@}" ;;
+        *) get_locks_summary_info "${@}" ;;
+    esac
+	
+}
+
+function get_locks_summary_info {
+
     STORE_PERIOD=30 # Срок хранения архивов ТЖ, содержащих информацию о проблемах - 30 дней
 
     WAIT_LIMIT=${1}
@@ -287,8 +298,8 @@ function get_locks_info {
 
     echo "lock: $(cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | grep -c ',TLOCK,')"
 
-    read -ar RESULT < <(cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | \
-        awk "/(TDEADLOCK|TTIMEOUT|TLOCK.*,WaitConnections=[0-9]+)/" | \
+    RESULT=$(cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | \
+        awk "/(TDEADLOCK|TTIMEOUT|TLOCK).*,WaitConnections='?[0-9,]+'?/" | \
         sed -re "s/[0-9]{2}:[0-9]{2}.[0-9]{6}-//; s/,[a-zA-Z\:]+=/,/g" | \
         awk -F"," -v lts="${WAIT_LIMIT}" 'BEGIN {dl=0; to=0; lw=0} { if ($2 == "TDEADLOCK") {dl+=1} \
             else if ($2 == "TTIMEOUT") { to+=1 } \
@@ -321,6 +332,43 @@ function get_locks_info {
     execute_tasks save_logs $(echo "${SRV_LIST[@]}" | perl -pe 's/ /\n/g' | sort -u)
 
     find "${LOG_DIR%/*}/problem_log/" -mtime +${STORE_PERIOD} -name "*.tgz" -delete 2>/dev/null
+}
+
+function get_locks_list_info {
+
+	[[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
+
+	printf "%12s|%12s|%10s|%12s|%12s|%s\n" "Duration" "DurationWC" "Count" "AvgDuration" "Max" "Context"
+
+	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null |
+	perl -pe 's/\xef\xbb\xbf//g' |
+	perl -pe 's/[\r\n]+/@@/g; s/\d{2}:\d{2}\.\d{6}-/\n/g' |
+	awk '/,TLOCK,.+Context=.+/' |
+	perl -pe "s/(\d+),(\w+),.*?p:processName=(.+?),.*?WaitConnections=('?[0-9,]*'?),.*Context=(.+)($|,.*$)/\1ϖ\2ϖ\3ϖ\4ϖ\5/" |
+	gawk -F'ϖ' '\
+		{CurDur=$1; Event=$2; Db=$3; WaitConn=$4; Cntx=$5; \
+		Group=Event "\t" Db; \
+		Dur[Group][Cntx]+=CurDur; \
+		DurSum+=CurDur; \
+		Execs[Group][Cntx]+=1; \
+		if (WaitConn!="") { DurWC[Group][Cntx]+=CurDur; DurWCSum+=CurDur; } \
+		if(!Max[Group][Cntx]||Max[Group][Cntx]<CurDur*1) Max[Group][Cntx]=CurDur*1} END \
+		{Koef=1000 * 1000; \
+		for (Group in Dur) \
+			for (Cntx in Dur[Group]) \
+			printf "%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
+				Dur[Group][Cntx]/Koef, \
+				DurWC[Group][Cntx]/Koef, \
+				Execs[Group][Cntx], \
+				(Dur[Group][Cntx]/Koef)/Execs[Group][Cntx], \
+				Max[Group][Cntx]/Koef, \
+				Group, Cntx; \
+		printf "9999999999_%12.3f - %s|%12.3f - %s\n", DurSum/Koef, "!Общее время блокировок", DurWCSum/Koef, "!Общее время ожидания блокировок"; \
+		}' |
+	sort -rn |
+	head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//' |
+	perl -pe 's/@@/\n/g'
+
 }
 
 function get_excps_info {
