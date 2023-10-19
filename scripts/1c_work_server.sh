@@ -144,7 +144,7 @@ function get_measures_info {
 
 	FILE_MASK=$(find "${LOG_DIR}"/*.xml -maxdepth 1 -type f -print | tail -n 1 | sed -r "s/.*?([0-9\-]{10}\s[0-9\-]{8}).*\.xml/\1/" 2>/dev/null)
 
-	echo -e "Apdex\t|Сред\t|Цел\t|Кол\t|Операция"
+	printf "%5s|%10s|%10s|%10s|%s\n" "Apdex" "Avg" "Target" "Count" "Operation"
 
 	put_brack_line
 
@@ -185,14 +185,16 @@ function get_measures_info {
 				count+=operVal[oper]["count"]; \
 				countT+=operVal[oper]["countT"]; \
 				count4T+=operVal[oper]["count4T"]; \
-				printf "%.2f\t|%.3f\t|%.2f\t|%d\t|%s\n", \
+				printf "%5.2f|%10.3f|%10.2f|%10d|%s\n", \
 					(operVal[oper]["countT"] + operVal[oper]["count4T"]/2)/operVal[oper]["count"], \
 					operVal[oper]["value"]/operVal[oper]["count"], \
 					operVal[oper]["target"], \
 					operVal[oper]["count"], \
 					oper \
 			} \
-			if (count > 0) printf "%s%.2f\t|%s\n", "!",(countT+count4T/2)/count, "Общий APDEX" \
+			summaryApdex = 1;
+			if (count > 0) summaryApdex=(countT+count4T/2)/count;
+			printf "%s%.2f|%s\n", "!",summaryApdex, "Общий APDEX" \
 			}' | \
 		sort -n | head -n "${TOP_LIMIT}")
 	echo "${RESULT}"
@@ -201,7 +203,7 @@ function get_measures_info {
 
 function get_db_summary_info {
 
-    echo -e "Длит\t|Кол\t|Сред\t|Макс\t|Контекст"
+    printf "%12s|%10s|%12s|%12s|%s\n" "Duration" "Count" "AvgDuration" "MaxDuration" "Context"
 
     put_brack_line
 
@@ -215,7 +217,7 @@ function get_db_summary_info {
 	Execs[Group]+=1; \
 	{Koef=1000 * 1000; \
 	for (Group in Dur) \
-		printf "%.3f\t|%d\t|%.3f\t|%.3f\t|%s\n", \
+		printf "%12.3f|%10d|%12.3f|%12.3f|%s\n", \
 			Dur[Group]/Koef, \
 			Execs[Group], \
 			(Dur[Group]/Koef)/Execs[Group], \
@@ -230,13 +232,13 @@ function get_db_list_info {
 
     [[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
 
-    echo -e "Длит\t|Кол\t|Сред\t|Макс\t|Контекст"
+    printf "%12s|%10s|%12s|%12s|%s\n" "Duration" "Count" "AvgDuration" "MaxDuration" "Context"
 
     put_brack_line
 
 	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null |
 	perl -pe 's/\xef\xbb\xbf//g' |
-	perl -pe 's/\n/@@/g; s/\d{2}:\d{2}\.\d{6}-/\n/g' |
+	perl -pe 's/[\r\n]+/@@/g; s/\d{2}:\d{2}\.\d{6}-/\n/g' |
 	awk '/,(DBPOSTGRS|DBMSSQL),/' |
 	perl -pe 's/(\d+).*?,p:processName=(.+?),.*?Context=(.+)($|,.*$)/$1ϖ$2ϖ$3/' |
 	gawk -F'ϖ' '\
@@ -253,7 +255,7 @@ function get_db_list_info {
 	{Koef=1000 * 1000; \
 	for (Group in Dur) \
 		for (Cntx in Dur[Group]) \
-		printf "%.3f\t|%d\t|%.3f\t|%.3f\t|%s\t%s\n", \
+		printf "%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
 			Dur[Group][Cntx]/Koef, \
 			Execs[Group][Cntx], \
 			(Dur[Group][Cntx]/Koef)/Execs[Group][Cntx], \
