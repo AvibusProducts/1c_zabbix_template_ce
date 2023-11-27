@@ -3,6 +3,7 @@
     <log location="{{tech_logs_dir}}/zabbix/locks" history="1">
 		<event>
 			<eq property="name" value="tlock"/>
+			<ne property="WaitConnections" value=""/>
 		</event>
 		<event>
 			<eq property="name" value="ttimeout"/>
