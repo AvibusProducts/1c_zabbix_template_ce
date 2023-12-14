@@ -224,11 +224,11 @@ function get_measures_info {
 			} \
 			summaryApdex = 1;
 			if (count > 0) summaryApdex=(countT+count4T/2)/count;
-			printf "%s%.2f|%s\n", "!",summaryApdex, "Общий APDEX" \
+			printf "0.00_%s%.2f|%s\n", "!",summaryApdex, "Общий APDEX" \
 			}' | \
-		sort -n | head -n "${TOP_LIMIT}")
+		sort -n | head -n "${TOP_LIMIT}" | perl -pe 's/0.00_//')
 	echo "${RESULT}"
-
+	
 }
 
 function get_db_summary_info {
