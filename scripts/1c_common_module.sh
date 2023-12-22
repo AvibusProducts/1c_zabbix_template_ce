@@ -3,6 +3,8 @@
 # Мониторинг 1С Предприятия 8.3 (общие переменные и функции)
 #
 
+#set -x
+
 # Вывести сообщение об ошибке переданное в аргументе и выйти с кодом 1
 function error {
     echo "ОШИБКА: ${1}" >&2 ; exit 1
@@ -27,11 +29,11 @@ else
     error "Не найдена платформа 1С Предприятия!"
 fi
 
-# Проверить инициализацию переменной TMPDIR
-[[ -z ${TMPDIR} ]] && export TMPDIR="/tmp"
+# Проверить инициализацию переменной CLSTR_CACHE_DIR
+#[[ -z ${CLSTR_CACHE_DIR} ]] && export CLSTR_CACHE_DIR=${CLSTR_CACHE_DIR}
 
 # Файл списка кластеров
-export CLSTR_CACHE="${TMPDIR}/1c_clusters_cache"
+#export CLSTR_CACHE="${CLSTR_CACHE_DIR}/1c_clusters_cache"
 
 # Параметры взаимодействия с сервисом RAS
 RAS_PORTS="1545"
@@ -46,7 +48,7 @@ export ERROR_UNKNOWN_MODE="Неизвестный режим работы скр
 export ERROR_UNKNOWN_PARAM="Неизвестный параметр для данного режима работы скрипта!"
 
 # Файл списка информационных баз
-export IB_CACHE=${TMPDIR}/1c_infobase_cache
+#export IB_CACHE=${CLSTR_CACHE_DIR}/1c_infobase_cache
 
 # Вывести разделительную строку длинной ${1} из символов ${2}
 # По-умолчанию раделительная строка - это 80 символов "-"
@@ -122,7 +124,7 @@ function push_clusters_list {
 #  - если в первом параметре указано self, то выводится только список кластеров текущего сервера
 function pop_clusters_list {
 
-    find "${TMPDIR}" -maxdepth 1 -regextype awk -regex ".*_(${RAS_PORTS//,/|})" -name "$( basename "${CLSTR_CACHE}" )_*" |
+    find "${CLSTR_CACHE_DIR}" -maxdepth 1 -regextype awk -regex ".*_(${RAS_PORTS//,/|})" -name "$( basename "${CLSTR_CACHE}" )_*" |
         grep -qv "^$" || error "Не найдено ни одного файла списка кластеров!"
 
     # ВАЖНО: Для этого блока включается extglob (возможно имеет смысл переделать)

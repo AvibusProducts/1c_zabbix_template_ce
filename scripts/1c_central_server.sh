@@ -3,12 +3,18 @@
 # Мониторинг 1С Предприятия 8.3 (центральный сервер)
 #
 
+#set -x
+
 WORK_DIR=$(dirname "${0}" | sed -r 's/\\/\//g; s/^(.{1}):/\/\1/')
 
 # Включить опцию extglob если отключена (используется в 1c_common_module.sh)
 shopt -q extglob || shopt -s extglob
 
 source "${WORK_DIR}/1c_common_module.sh" 2>/dev/null || { echo "ОШИБКА: Не найден файл 1c_common_module.sh!" ; exit 1; }
+
+function check_cache_dir {
+    [[ -d "${1}" ]] || error "Неверно задан каталог хранения кэша данных кластера!"
+}
 
 function get_clusters_sessions {
 
@@ -101,9 +107,13 @@ function get_infobases_restrictions {
 }
 
 case ${1} in
-    sessions) shift; make_ras_params "${@}"; get_session_amounts ;;
-    infobases) shift 2; make_ras_params "${@}"; get_infobases_list self;;
-    clusters) shift; make_ras_params "${@}"; get_clusters_list self ;;
-    ib_restrict) get_infobases_restrictions ;;
+	sessions | infobases | clusters) check_cache_dir "${2}";
+        export CLSTR_CACHE_DIR="${2}";
+		export CLSTR_CACHE="${CLSTR_CACHE_DIR}/1c_clusters_cache";
+		export IB_CACHE="${CLSTR_CACHE_DIR}/1c_infobase_cache";;&
+    sessions) shift 2; make_ras_params "${@}"; get_session_amounts ;;
+    infobases) shift 3; make_ras_params "${@}"; get_infobases_list self;;
+    clusters) shift 2; make_ras_params "${@}"; get_clusters_list self ;;
+    ib_restrict) shift; get_infobases_restrictions ;;
     *) error "${ERROR_UNKNOWN_MODE}" ;;
 esac

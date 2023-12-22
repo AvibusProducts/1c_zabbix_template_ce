@@ -168,66 +168,77 @@ function get_measures_info {
 
     [[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
 
-	[[ -n ${2} ]] && APDEX_LIST=${2//,/|} || APDEX_LIST="\"?.*"
+    [[ -n ${2} ]] && APDEX_LIST=${2//,/|} || APDEX_LIST="\"?.*"
 
-	ls ${LOG_DIR}/*.xml >/dev/null 2>&1 || error "Нет файлов для обработки"
+    ls ${LOG_DIR}/*.xml >/dev/null 2>&1 || error "Нет файлов для обработки"
 
-	FILE_MASK=$(find "${LOG_DIR}"/*.xml -maxdepth 1 -type f -print | tail -n 1 | sed -r "s/.*?([0-9\-]{10}\s[0-9\-]{8}).*\.xml/\1/" 2>/dev/null)
+    FILE_MASK=$(find "${LOG_DIR}"/*.xml -maxdepth 1 -type f -print | tail -n 1 | sed -r "s/.*?([0-9\-]{10}\s[0-9\-]{8}).*\.xml/\1/" 2>/dev/null)
 
-	printf "%5s|%10s|%10s|%10s|%s\n" "Apdex" "Avg" "Target" "Count" "Operation"
+    printf "%5s|%10s|%10s|%10s|%s\n" "Apdex" "Avg" "Target" "Count" "Operation"
 
-	put_brack_line
+    put_brack_line
 
-	RESULT=$(grep "" "${LOG_DIR}"/"${FILE_MASK}"*.xml 2>/dev/null | \
-		perl -pe 's/\xef\xbb\xbf//g' | \
-		sed '/<\/prf:/d' | \
-		perl -pe 's/\n/@@/g; s/<prf:KeyOperation/\n<prf:KeyOperation/g' | \
-		awk '/<prf:KeyOperation.*?nameFull=".*?('${APDEX_LIST}')/' | \
-		perl -pe 's/@@.*?measurement value=\"(.+?)\".*?\/>/$1;/g' | \
-		perl -pe 's/.*?targetValue=\"(.+?)\".*?nameFull=\"(.+?)\".*?>/$1ϖ$2ϖ/g' | \
-		perl -pe 's/@@//g' | \
-		gawk -F'ϖ' '\
-			{target=$1; oper=$2; \
-			operVal[oper]["target"]=target; \
-			split($3, values, ";"); \
-			target4=target*4; \
-			sum=0; \
-			count=0; \
-			countT=0; \
-			count4T=0; \
-			for (value in values) { \
-				curValue=values[value]; \
-				if (!curValue) continue; \
-				sum+=curValue; \
-				count++; \
-				if (curValue<target) countT++; \
-				else if (curValue<target4) count4T++; \
-			} \
-			operVal[oper]["value"]+=sum; \
-			operVal[oper]["count"]+=count; \
-			operVal[oper]["countT"]+=countT; \
-			operVal[oper]["count4T"]+=count4T; \
-			} END { \
-			count=0; \
-			countT=0; \
-			count4T=0; \
-			for (oper in operVal) {\
-				count+=operVal[oper]["count"]; \
-				countT+=operVal[oper]["countT"]; \
-				count4T+=operVal[oper]["count4T"]; \
-				printf "%5.2f|%10.3f|%10.2f|%10d|%s\n", \
-					(operVal[oper]["countT"] + operVal[oper]["count4T"]/2)/operVal[oper]["count"], \
-					operVal[oper]["value"]/operVal[oper]["count"], \
-					operVal[oper]["target"], \
-					operVal[oper]["count"], \
-					oper \
-			} \
-			summaryApdex = 1;
-			if (count > 0) summaryApdex=(countT+count4T/2)/count;
-			printf "0.00_%s%.2f|%s\n", "!",summaryApdex, "Общий APDEX" \
-			}' | \
-		sort -n | head -n "${TOP_LIMIT}" | perl -pe 's/0.00_//')
-	echo "${RESULT}"
+    RESULT=$(grep "" "${LOG_DIR}"/"${FILE_MASK}"*.xml 2>/dev/null | \
+        perl -pe 's/\xef\xbb\xbf//g' | \
+        sed '/<\/prf:/d' | \
+        perl -pe 's/\n/@@/g; s/<prf:KeyOperation/\n<prf:KeyOperation/g' | \
+        awk '/<prf:KeyOperation.*?nameFull=".*?('${APDEX_LIST}')/' | \
+        perl -pe 's/@@.*?measurement value=\"(.+?)\".*?\/>/$1;/g' | \
+        perl -pe 's/.*?targetValue=\"(.+?)\".*?nameFull=\"(.+?)\".*?>/$1ϖ$2ϖ/g' | \
+        perl -pe 's/@@//g' | \
+        gawk -F'ϖ' '\
+            {target=$1; oper=$2; \
+            operVal[oper]["target"]=target; \
+            split($3, values, ";"); \
+            target4=target*4; \
+            sum=0; \
+            count=0; \
+            countT=0; \
+            count4T=0; \
+            for (value in values) { \
+                curValue=values[value]; \
+                if (!curValue) continue; \
+                sum+=curValue; \
+                count++; \
+                if (curValue<target) countT++; \
+                else if (curValue<target4) count4T++; \
+            } \
+            operVal[oper]["value"]+=sum; \
+            operVal[oper]["count"]+=count; \
+            operVal[oper]["countT"]+=countT; \
+            operVal[oper]["count4T"]+=count4T; \
+            } END { \
+            count=0; \
+            countT=0; \
+            count4T=0; \
+            for (oper in operVal) {\
+                count+=operVal[oper]["count"]; \
+                countT+=operVal[oper]["countT"]; \
+                count4T+=operVal[oper]["count4T"]; \
+                printf "%5.2f|%10.3f|%10.2f|%10d|%s\n", \
+                    (operVal[oper]["countT"] + operVal[oper]["count4T"]/2)/operVal[oper]["count"], \
+                    operVal[oper]["value"]/operVal[oper]["count"], \
+                    operVal[oper]["target"], \
+                    operVal[oper]["count"], \
+                    oper \
+            } \
+            summaryApdex = 1;
+            if (count > 0) summaryApdex=(countT+count4T/2)/count;
+            printf "0.0__%s%.2f|%s\n", "!",summaryApdex, "Общий APDEX" \
+            }' | \
+        sort -n | head -n "${TOP_LIMIT}" | perl -pe 's/0.0__//')
+    echo "${RESULT}"
+    
+}
+
+function get_db_info {
+
+	MODE=${1}
+
+	case ${MODE} in
+        list) shift 1; get_db_list_info "${@}" ;;
+        *) get_db_summary_info "${@}" ;;
+    esac
 	
 }
 
@@ -478,17 +489,18 @@ function get_memory_counts {
     RPHOST_PID_HASH="${TMPDIR}/1c_rphost_pid_hash"
 
     if [[ -z "${IS_WINDOWS}" ]]; then
-        ps -hwwp "$( pgrep -d, 'ragent|rphost|rmngr' )" -o comm,pid,rss,cmd -k pid |
-            sed -re 's/^([^ ]+) +([0-9]+) +([0-9]+) +/\1,\2,\3,/'
+        ps -hwwp "$( pgrep -d, 'ragent|rphost|rmngr|postgres|sqlservr' )" -o comm,pid,rss,vsz,cmd -k pid |
+            sed -re 's/^([^ ]+) +([0-9]+) +([0-9]+) +([0-9]+) +/\1,\2,\3,\4,/'
     else
-        wmic path win32_process where "caption like 'ragent%' or caption like 'rmngr%' or caption like 'rphost%'" \
-            get caption,processid,workingsetsize,commandline /format:csv |
-            sed -re 's/^[^,]+,([^,]+),([^,]+),([^,]+),(.*)/\1,\3,\4,\2/'
+        wmic path win32_process where "caption like 'ragent%' or caption like 'rmngr%' or caption like 'rphost%' or caption like 'rphost%' or caption like 'sqlservr%' or caption like 'postgres%'" \
+            get caption,processid,virtualsize,workingsetsize,commandline /format:csv |
+            sed -re 's/^[^,]+,([^,]+),([^,]+),([^,]+),([^,]+),(.*)/\1,\3,\5,\4,\2/'
     fi | awk -F, -v mem_in_kb="${IS_WINDOWS:-1024}" -v pid_hash="$( cat "${RPHOST_PID_HASH}" 2>/dev/null )" \
         '/.*,[0-9]+,[0-9]+/ {
             proc_name[$1]=gensub(/[.].+/,"","g",$1)
             proc_pids[$1][$2]
-            proc[$1,"memory"]+=$3 
+            proc[$1,"memory"]+=$3
+			proc[$1,"vmemory"]+=$4
             } END {
                 for ( pn in proc_name ) { 
                     proc_flag=""; pid_list=""
@@ -505,7 +517,7 @@ function get_memory_counts {
                             print new_hash > "'"${RPHOST_PID_HASH}"'"
                             break
                     }
-                    print proc_name[pn]":",length(proc_pids[pn]),proc[pn,"memory"]*mem_in_kb,proc_flag
+                    print proc_name[pn]":",length(proc_pids[pn]),proc[pn,"memory"]*mem_in_kb,proc[pn,"vmemory"]*mem_in_kb,proc_flag
                 }
             }'
 
@@ -569,4 +581,3 @@ case ${1} in
     perfomance) shift; make_ras_params "${@}"; get_available_perfomance ;;
     *) error "${ERROR_UNKNOWN_MODE}" ;;
 esac
-

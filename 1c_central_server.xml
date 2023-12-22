@@ -1,43 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
-    <version>4.4</version>
-    <date>2023-07-13T05:09:00Z</date>
+    <version>6.0</version>
+    <date>2023-12-22T11:57:28Z</date>
     <groups>
         <group>
-            <name>Templates/Applications</name>
+            <uuid>d83f326f893144b0b86d0e7c36a5b1d9</uuid>
+            <name>Templates/1C</name>
         </group>
         <group>
-            <name>Templates/Kaminsoft</name>
+            <uuid>a571c0d144b14fd4a87a9d9b2aa9fcd6</uuid>
+            <name>Templates/Applications</name>
         </group>
     </groups>
     <templates>
         <template>
+            <uuid>c080207928df4af39b139161b3890077</uuid>
             <template>Template App 1C Enterprise Central Server</template>
             <name>Template App 1C Enterprise Central Server</name>
-            <description>Шаблон для мониторинга центального сервера 1С Предприятия&#13;
-&#13;
+            <description>Шаблон для мониторинга центального сервера 1С Предприятия
+
 Подробнее https://slothfk.github.io/1c_zabbix_template_ce/</description>
             <groups>
                 <group>
-                    <name>Templates/Applications</name>
+                    <name>Templates/1C</name>
                 </group>
                 <group>
-                    <name>Templates/Kaminsoft</name>
+                    <name>Templates/Applications</name>
                 </group>
             </groups>
-            <applications>
-                <application>
-                    <name>[1С] Доступность</name>
-                </application>
-                <application>
-                    <name>[1С] Информация</name>
-                </application>
-                <application>
-                    <name>[1С] Сеансы</name>
-                </application>
-            </applications>
             <items>
                 <item>
+                    <uuid>36897cdf5cfc4b77aab8761e0a5aa29e</uuid>
                     <name>[1С/Инфобаза] Ограничения</name>
                     <type>ZABBIX_ACTIVE</type>
                     <key>1c.cs.ib.restrictions</key>
@@ -45,56 +38,66 @@
                     <history>0</history>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
-                    <applications>
-                        <application>
-                            <name>[1С] Информация</name>
-                        </application>
-                    </applications>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Информация</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>f158947ba96a4eaab40f45c0ad29b1a3</uuid>
                     <name>[1С/Сеансы] Количество активных</name>
                     <type>DEPENDENT</type>
                     <key>1c.cs.sessions.as</key>
                     <delay>0</delay>
                     <description>Число сеансов, имеющих активный серверный вызов</description>
-                    <applications>
-                        <application>
-                            <name>[1С] Сеансы</name>
-                        </application>
-                    </applications>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
-                            <params>summary:\d+:\d+:\d+:\d+:\d+:(\d+):\d+
-\1</params>
+                            <parameters>
+                                <parameter>summary:\d+:\d+:\d+:\d+:\d+:(\d+):\d+</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                        <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Сеансы</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>997d6e6748da4bca8c715a46167c156c</uuid>
                     <name>[1С/Сеансы] Количество фоновых заданий</name>
                     <type>DEPENDENT</type>
                     <key>1c.cs.sessions.bg</key>
                     <delay>0</delay>
-                    <applications>
-                        <application>
-                            <name>[1С] Сеансы</name>
-                        </application>
-                    </applications>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
-                            <params>summary:\d+:(\d+):\d+:\d+:\d+
-\1</params>
+                            <parameters>
+                                <parameter>summary:\d+:(\d+):\d+:\d+:\d+</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                        <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Сеансы</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>9b52a39c47ea417eb6fcce301caf5c4e</uuid>
                     <name>[1С/Сеансы] Текущая длительность вызова фонового задания</name>
                     <type>DEPENDENT</type>
                     <key>1c.cs.sessions.bgd</key>
@@ -102,27 +105,33 @@
                     <value_type>FLOAT</value_type>
                     <units>s</units>
                     <description>Максимальное значение длительности среди серверных вызовов фоновых заданий, выполняющихся в настоящий момент</description>
-                    <applications>
-                        <application>
-                            <name>[1С] Сеансы</name>
-                        </application>
-                    </applications>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
-                            <params>summary:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                            <parameters>
+                                <parameter>summary:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
                         </step>
                         <step>
                             <type>MULTIPLIER</type>
-                            <params>0.001</params>
+                            <parameters>
+                                <parameter>0.001</parameter>
+                            </parameters>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                        <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Сеансы</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>94dcde98f07e4973910874441c568a6c</uuid>
                     <name>[1С/Сеансы] Текущая длительность пользовательского вызова</name>
                     <type>DEPENDENT</type>
                     <key>1c.cs.sessions.cld</key>
@@ -130,48 +139,58 @@
                     <value_type>FLOAT</value_type>
                     <units>s</units>
                     <description>Максимальное значение длительности среди пользовательских (интерактивных) серверных вызовов, выполняющихся в настоящий момент</description>
-                    <applications>
-                        <application>
-                            <name>[1С] Сеансы</name>
-                        </application>
-                    </applications>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
-                            <params>summary:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                            <parameters>
+                                <parameter>summary:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
                         </step>
                         <step>
                             <type>MULTIPLIER</type>
-                            <params>0.001</params>
+                            <parameters>
+                                <parameter>0.001</parameter>
+                            </parameters>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                        <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Сеансы</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>afb01046a41c43d58737072a2716192d</uuid>
                     <name>[1С/Сеансы] Количество спящих</name>
                     <type>DEPENDENT</type>
                     <key>1c.cs.sessions.hb</key>
                     <delay>0</delay>
-                    <applications>
-                        <application>
-                            <name>[1С] Сеансы</name>
-                        </application>
-                    </applications>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
-                            <params>summary:\d+:\d+:(\d+):\d+:\d+
-\1</params>
+                            <parameters>
+                                <parameter>summary:\d+:\d+:(\d+):\d+:\d+</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                        <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Сеансы</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>63f6abd952c44d6eb12058dc698036b5</uuid>
                     <name>[1С/Сеансы] Текущая длительность вызова http-сервиса</name>
                     <type>DEPENDENT</type>
                     <key>1c.cs.sessions.hsd</key>
@@ -179,90 +198,108 @@
                     <value_type>FLOAT</value_type>
                     <units>s</units>
                     <description>Максимальное значение длительности среди серверных вызовов http-сервисов, выполняющихся в настоящий момент</description>
-                    <applications>
-                        <application>
-                            <name>[1С] Сеансы</name>
-                        </application>
-                    </applications>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
-                            <params>summary:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                            <parameters>
+                                <parameter>summary:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
                         </step>
                         <step>
                             <type>MULTIPLIER</type>
-                            <params>0.001</params>
+                            <parameters>
+                                <parameter>0.001</parameter>
+                            </parameters>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                        <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Сеансы</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>f95b0884711c46ecb33b6f293a50aa08</uuid>
                     <name>[1С/Сеансы] Количество http-сервисов</name>
                     <type>DEPENDENT</type>
                     <key>1c.cs.sessions.http</key>
                     <delay>0</delay>
-                    <applications>
-                        <application>
-                            <name>[1С] Сеансы</name>
-                        </application>
-                    </applications>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
-                            <params>summary:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                            <parameters>
+                                <parameter>summary:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                        <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Сеансы</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>8ed077f7656e46ea998632f92983f8b4</uuid>
                     <name>[1С/Сеансы] Общее количество</name>
                     <type>DEPENDENT</type>
                     <key>1c.cs.sessions.total</key>
                     <delay>0</delay>
-                    <applications>
-                        <application>
-                            <name>[1С] Сеансы</name>
-                        </application>
-                    </applications>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
-                            <params>summary:(\d+):\d+:\d+:\d+:\d+
-\1</params>
+                            <parameters>
+                                <parameter>summary:(\d+):\d+:\d+:\d+:\d+</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                        <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Сеансы</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>d0b9e3206ef144e896a88433e0b6ad69</uuid>
                     <name>[1С/Сеансы] Количество веб-сервисов</name>
                     <type>DEPENDENT</type>
                     <key>1c.cs.sessions.ws</key>
                     <delay>0</delay>
-                    <applications>
-                        <application>
-                            <name>[1С] Сеансы</name>
-                        </application>
-                    </applications>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
-                            <params>summary:\d+:\d+:\d+:(\d+):\d+
-\1</params>
+                            <parameters>
+                                <parameter>summary:\d+:\d+:\d+:(\d+):\d+</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                        <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Сеансы</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>e944803821044c8b8f6459c1766d005f</uuid>
                     <name>[1С/Сеансы] Текущая длительность вызова веб-сервиса</name>
                     <type>DEPENDENT</type>
                     <key>1c.cs.sessions.wsd</key>
@@ -270,71 +307,84 @@
                     <value_type>FLOAT</value_type>
                     <units>s</units>
                     <description>Максимальное значение длительности среди серверных вызовов веб-сервисов, выполняющихся в настоящий момент</description>
-                    <applications>
-                        <application>
-                            <name>[1С] Сеансы</name>
-                        </application>
-                    </applications>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
-                            <params>summary:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                            <parameters>
+                                <parameter>summary:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
                         </step>
                         <step>
                             <type>MULTIPLIER</type>
-                            <params>0.001</params>
+                            <parameters>
+                                <parameter>0.001</parameter>
+                            </parameters>
                         </step>
                     </preprocessing>
                     <master_item>
-                        <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                        <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Сеансы</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>f0f8f45eefd14e69b086bdb1b02713ec</uuid>
                     <name>[1С/Центральный сервер] Текущие сеансы</name>
                     <type>ZABBIX_ACTIVE</type>
-                    <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                    <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     <history>0</history>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
-                    <applications>
-                        <application>
-                            <name>[1С] Информация</name>
-                        </application>
-                    </applications>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Информация</value>
+                        </tag>
+                    </tags>
                 </item>
             </items>
             <discovery_rules>
                 <discovery_rule>
+                    <uuid>dcf8cea672dc45c1b89f53bbc63f87df</uuid>
                     <name>[1С/Центральный сервер] Кластеры</name>
                     <type>ZABBIX_ACTIVE</type>
-                    <key>1c.cs.clusters.discovery[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                    <key>1c.cs.clusters.discovery[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     <delay>1h</delay>
                     <status>DISABLED</status>
                     <item_prototypes>
                         <item_prototype>
+                            <uuid>f6922bd7066d4932af19f67ebf519333</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Количество активных сеансов</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.as[{#CLSTR_UUID}]</key>
                             <delay>0</delay>
                             <description>Число сеансов кластера, имеющих активный серверный вызов</description>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>ab05b88fce664f78ab9d7236b6393db0</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Текущая длительность вызова фонового задания</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.bgd[{#CLSTR_UUID}]</key>
@@ -342,48 +392,58 @@
                             <value_type>FLOAT</value_type>
                             <units>s</units>
                             <description>Максимальное значение длительности сред серверных вызовов фоновых заданий, выполняющихся в настоящий момент в данном кластере</description>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                                 <step>
                                     <type>MULTIPLIER</type>
-                                    <params>0.001</params>
+                                    <parameters>
+                                        <parameter>0.001</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>14f4dcbecda5473392098d1fbd2eaf6c</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Количество сеансов фоновых заданий</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.bg[{#CLSTR_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>CL#{#CLSTR_UUID}:\d+:(\d+):\d+:\d+:\d+
-\1</params>
+                                    <parameters>
+                                        <parameter>CL#{#CLSTR_UUID}:\d+:(\d+):\d+:\d+:\d+</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>4d03f4c517e7446787c82daa374af104</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Текущая длительность пользовательского вызова</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.cld[{#CLSTR_UUID}]</key>
@@ -391,48 +451,58 @@
                             <value_type>FLOAT</value_type>
                             <units>s</units>
                             <description>Максимальное значение длительности среди пользовательских (интерактивных) серверных вызовов, выполняющихся в настоящий момент в данном кластере</description>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                                 <step>
                                     <type>MULTIPLIER</type>
-                                    <params>0.001</params>
+                                    <parameters>
+                                        <parameter>0.001</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>d8c62ee5f0e74c548250600ec38c7a29</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Количество спящих сеансов</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.hb[{#CLSTR_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>CL#{#CLSTR_UUID}:\d+:\d+:(\d+):\d+:\d+
-\1</params>
+                                    <parameters>
+                                        <parameter>CL#{#CLSTR_UUID}:\d+:\d+:(\d+):\d+:\d+</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>e5a0cbcb5c8c469d8174b7ac723fcb2e</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Текущая длительность вызова http-сервиса</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.hsd[{#CLSTR_UUID}]</key>
@@ -440,69 +510,83 @@
                             <value_type>FLOAT</value_type>
                             <units>s</units>
                             <description>Максимальное значение длительности сред серверных вызовов http-сервисов, выполняющихся в настоящий момент в данном кластере</description>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                                 <step>
                                     <type>MULTIPLIER</type>
-                                    <params>0.001</params>
+                                    <parameters>
+                                        <parameter>0.001</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>86d86b68e0d14ffdad5e1084f2a8a7ad</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Количество сеансов http-сервисов</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.hs[{#CLSTR_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>0eb01cf85d7849f6a06b3eabd4d1ce4f</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Общее количество сеансов</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.total[{#CLSTR_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>CL#{#CLSTR_UUID}:(\d+):\d+:\d+:\d+:\d+
-\1</params>
+                                    <parameters>
+                                        <parameter>CL#{#CLSTR_UUID}:(\d+):\d+:\d+:\d+:\d+</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>33fdd5dc1ea943038b1fdacbff7d6881</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Текущая длительность вызова веб-сервиса</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.wsd[{#CLSTR_UUID}]</key>
@@ -510,50 +594,60 @@
                             <value_type>FLOAT</value_type>
                             <units>s</units>
                             <description>Максимальное значение длительности сред серверных вызовов веб-сервисов, выполняющихся в настоящий момент в данном кластере</description>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>CL#{#CLSTR_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                                 <step>
                                     <type>MULTIPLIER</type>
-                                    <params>0.001</params>
+                                    <parameters>
+                                        <parameter>0.001</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>3a81e2df5ba748f797cbd089c71fe6bd</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Количество сеансов веб-сервисов</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.ws[{#CLSTR_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>CL#{#CLSTR_UUID}:\d+:\d+:\d+:(\d+):\d+
-\1</params>
+                                    <parameters>
+                                        <parameter>CL#{#CLSTR_UUID}:\d+:\d+:\d+:(\d+):\d+</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                     </item_prototypes>
                     <graph_prototypes>
                         <graph_prototype>
+                            <uuid>63b5ee92945047238946433ad87d392d</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Максимальная длительность текущего вызова</name>
                             <graph_items>
                                 <graph_item>
@@ -590,6 +684,7 @@
                             </graph_items>
                         </graph_prototype>
                         <graph_prototype>
+                            <uuid>ecae4094dcdf406da4fd341ea3cce480</uuid>
                             <name>[1С/Кластер/{#CLSTR_NAME}] Текущие сеансы</name>
                             <graph_items>
                                 <graph_item>
@@ -649,68 +744,80 @@
                     </graph_prototypes>
                 </discovery_rule>
                 <discovery_rule>
+                    <uuid>2d894ccd65964e46b69a29f1fd27ef8e</uuid>
                     <name>[1С/Центральный сервер] Информационные базы</name>
                     <type>ZABBIX_ACTIVE</type>
-                    <key>1c.cs.infobases.discovery[{$IBNAME_WITH_CLSTR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                    <key>1c.cs.infobases.discovery[{$CLSTR_CACHE_DIR},{$IBNAME_WITH_CLSTR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     <delay>1h</delay>
                     <item_prototypes>
                         <item_prototype>
+                            <uuid>cc19c32f286b41698d704d91d8943cf5</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Блокировка регламентных заданий</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.ib.sched_deny[{#IB_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Информация</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID},\d+,(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID},\d+,(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
                                 <key>1c.cs.ib.restrictions</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Информация</value>
+                                </tag>
+                            </tags>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{last()}=1</expression>
+                                    <uuid>c18f6aa099a145cdb32c86d68fcf83bf</uuid>
+                                    <expression>last(/Template App 1C Enterprise Central Server/1c.cs.ib.sched_deny[{#IB_UUID}])=1</expression>
                                     <name>[1С/Ифобаза/{#IB_NAME}] Включена блокировка регламентных заданий</name>
                                     <priority>AVERAGE</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>4eb2d9e94570431eadb084a8ef7df09b</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Блокировка начала сеансов</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.ib.sess_deny[{#IB_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Информация</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID},(\d+),\d+
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID},(\d+),\d+</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
                                 <key>1c.cs.ib.restrictions</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Информация</value>
+                                </tag>
+                            </tags>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{last()}=1</expression>
+                                    <uuid>070b339056f64ef9b4792ec05196c0c2</uuid>
+                                    <expression>last(/Template App 1C Enterprise Central Server/1c.cs.ib.sess_deny[{#IB_UUID}])=1</expression>
                                     <name>[1С/Ифобаза/{#IB_NAME}] Включена блокировка начала сеансов</name>
                                     <priority>AVERAGE</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>e779c182f0d546b1bb3e84bc1ee8be16</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Сеанс длительного пользовательского вызова</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.asu[{#IB_UUID}]</key>
@@ -719,45 +826,53 @@
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
                             <description>Пользовательский сеанс (имя пользователя, номер сеанса) с самым долгим активным текущим вызовом (время вызова текущее)</description>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(.*)
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(.*)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>c9ff18ca576d412d99a61280f343dee2</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Количество активных сеансов</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.as[{#IB_UUID}]</key>
                             <delay>0</delay>
                             <description>Число сеансов информационной базы, имеющих активный серверный вызов</description>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>e4b69279bb5d4c5ab00598df27237996</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Текущая длительность вызова фонового задания</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.bgd[{#IB_UUID}]</key>
@@ -765,48 +880,58 @@
                             <value_type>FLOAT</value_type>
                             <units>s</units>
                             <description>Максимальное значение длительности среди серверных вызовов фоновых заданий, выполняющихся в настоящий момент в данной информационной базе</description>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                                 <step>
                                     <type>MULTIPLIER</type>
-                                    <params>0.001</params>
+                                    <parameters>
+                                        <parameter>0.001</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>cb8b060003c54a9a8fe0b62b6f22d5aa</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Количество сеансов фоновых заданий</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.bg[{#IB_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID}:\d+:(\d+):\d+:\d+:\d+
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID}:\d+:(\d+):\d+:\d+:\d+</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>7e45bdcc0c304de9a12a57db904d0171</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Текущая длительность пользовательского вызова</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.cld[{#IB_UUID}]</key>
@@ -814,55 +939,66 @@
                             <value_type>FLOAT</value_type>
                             <units>s</units>
                             <description>Максимальное значение длительности среди пользовательских (интерактивных) серверных вызовов, выполняющихся в настоящий момент в данной информационной базе</description>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                                 <step>
                                     <type>MULTIPLIER</type>
-                                    <params>0.001</params>
+                                    <parameters>
+                                        <parameter>0.001</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{last()}&gt;{$CALL_DUR_THRESHOLD}</expression>
+                                    <uuid>1237260ec7134c9eb1811258fc716b95</uuid>
+                                    <expression>last(/Template App 1C Enterprise Central Server/1c.cs.sessions.cld[{#IB_UUID}])&gt;{$CALL_DUR_THRESHOLD}</expression>
                                     <name>[1С/Ифобаза/{#IB_NAME}] Превышен порог длительности пользовательского вызова</name>
                                     <priority>AVERAGE</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>b900ab12df654e7cbe88ea0c8c28cd26</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Количество спящих сеансов</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.hb[{#IB_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID}:\d+:\d+:(\d+):\d+:\d+
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID}:\d+:\d+:(\d+):\d+:\d+</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>789d5053a46a45999f2a275a99c6abaf</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Текущая длительность вызова http-сервиса</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.hsd[{#IB_UUID}]</key>
@@ -870,69 +1006,83 @@
                             <value_type>FLOAT</value_type>
                             <units>s</units>
                             <description>Максимальное значение длительности среди серверных вызовов http-сервисов, выполняющихся в настоящий момент в данной информационной базе</description>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                                 <step>
                                     <type>MULTIPLIER</type>
-                                    <params>0.001</params>
+                                    <parameters>
+                                        <parameter>0.001</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>daed482ac61443b2ada2c91a189c27e9</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Количество сеансов http-сервисов</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.hs[{#IB_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>88bd0a08571c4bf3914be55cfae1f11d</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Общее количество сеансов</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.total[{#IB_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID}:(\d+):\d+:\d+:\d+:\d+
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID}:(\d+):\d+:\d+:\d+:\d+</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>627b00967a3b4f72a21c8d4dc1b76c92</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Текущая длительность вызова веб-сервиса</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.wsd[{#IB_UUID}]</key>
@@ -940,50 +1090,60 @@
                             <value_type>FLOAT</value_type>
                             <units>s</units>
                             <description>Максимальное значение длительности среди серверных вызовов веб-сервисов, выполняющихся в настоящий момент в данной информационной базе</description>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID}:\d+:\d+:\d+:\d+:\d+:\d+:\d+:\d+:(\d+)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                                 <step>
                                     <type>MULTIPLIER</type>
-                                    <params>0.001</params>
+                                    <parameters>
+                                        <parameter>0.001</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>d6780483fde94e81b2bd74bd3326d190</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Количество сеансов веб-сервисов</name>
                             <type>DEPENDENT</type>
                             <key>1c.cs.sessions.ws[{#IB_UUID}]</key>
                             <delay>0</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Сеансы</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
-                                    <params>IB#{#IB_UUID}:\d+:\d+:\d+:(\d+):\d+
-\1</params>
+                                    <parameters>
+                                        <parameter>IB#{#IB_UUID}:\d+:\d+:\d+:(\d+):\d+</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>1c.cs.sessions[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                                <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                             </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Сеансы</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                     </item_prototypes>
                     <graph_prototypes>
                         <graph_prototype>
+                            <uuid>3df1e575675c429cb01c4829ad62cb2a</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Максимальная длительность текущего вызова</name>
                             <graph_items>
                                 <graph_item>
@@ -1020,6 +1180,7 @@
                             </graph_items>
                         </graph_prototype>
                         <graph_prototype>
+                            <uuid>391a49d2b1204d4fa35708fd0151c7cf</uuid>
                             <name>[1С/Инфобаза/{#IB_NAME}] Текущие сеансы</name>
                             <graph_items>
                                 <graph_item>
@@ -1079,26 +1240,30 @@
                     </graph_prototypes>
                 </discovery_rule>
                 <discovery_rule>
+                    <uuid>85c582551f584cf69d9cf93296e8ddfa</uuid>
                     <name>[1С/Центральный сервер] Сервисы RAS</name>
                     <key>1c.cs.ras.discovery[{$RAS_PORTS}]</key>
                     <delay>1h</delay>
                     <item_prototypes>
                         <item_prototype>
+                            <uuid>0789e1879ff145c99000bb2d7b0fc629</uuid>
                             <name>[1С/Центральный сервер] Статус сервиса RAS (порт {#RAS_PORT})</name>
                             <type>SIMPLE</type>
                             <key>net.tcp.service[tcp,,{#RAS_PORT}]</key>
                             <delay>30s</delay>
-                            <applications>
-                                <application>
-                                    <name>[1С] Доступность</name>
-                                </application>
-                            </applications>
                             <valuemap>
                                 <name>Service state</name>
                             </valuemap>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>[1С] Доступность</value>
+                                </tag>
+                            </tags>
                             <trigger_prototypes>
                                 <trigger_prototype>
-                                    <expression>{last()}=0</expression>
+                                    <uuid>b9caebcb9317423d88f922d1cf5b9306</uuid>
+                                    <expression>last(/Template App 1C Enterprise Central Server/net.tcp.service[tcp,,{#RAS_PORT}])=0</expression>
                                     <name>[1С/Центральный сервер] Недоступен сервис RAS на порту {#RAS_PORT}</name>
                                     <priority>HIGH</priority>
                                 </trigger_prototype>
@@ -1112,6 +1277,11 @@
                     <macro>{$CALL_DUR_THRESHOLD}</macro>
                     <value>60</value>
                     <description>Порог длительности пользовательского вызова, сек</description>
+                </macro>
+                <macro>
+                    <macro>{$CLSTR_CACHE_DIR}</macro>
+                    <value>/var/log/1c/zabbix/cluster_cache</value>
+                    <description>Директория для формирования временных данных - кэш данных кластера, например</description>
                 </macro>
                 <macro>
                     <macro>{$IBNAME_WITH_CLSTR}</macro>
@@ -1137,10 +1307,27 @@
                     <description>Имя пользователя - администратора кластера</description>
                 </macro>
             </macros>
+            <valuemaps>
+                <valuemap>
+                    <uuid>598ba60cff3f480c9eede8c5b467b1cf</uuid>
+                    <name>Service state</name>
+                    <mappings>
+                        <mapping>
+                            <value>0</value>
+                            <newvalue>Down</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>1</value>
+                            <newvalue>Up</newvalue>
+                        </mapping>
+                    </mappings>
+                </valuemap>
+            </valuemaps>
         </template>
     </templates>
     <graphs>
         <graph>
+            <uuid>76d4b897330947fb8a54c97cca4a5b5e</uuid>
             <name>[1С/Центральный сервер] Максимальная длительность текущего вызова</name>
             <graph_items>
                 <graph_item>
@@ -1177,6 +1364,7 @@
             </graph_items>
         </graph>
         <graph>
+            <uuid>20b15868520d4f179c12c09acd3e1da8</uuid>
             <name>[1С/Центральный сервер] Текущие сеансы</name>
             <graph_items>
                 <graph_item>
@@ -1235,19 +1423,4 @@
             </graph_items>
         </graph>
     </graphs>
-    <value_maps>
-        <value_map>
-            <name>Service state</name>
-            <mappings>
-                <mapping>
-                    <value>0</value>
-                    <newvalue>Down</newvalue>
-                </mapping>
-                <mapping>
-                    <value>1</value>
-                    <newvalue>Up</newvalue>
-                </mapping>
-            </mappings>
-        </value_map>
-    </value_maps>
 </zabbix_export>
