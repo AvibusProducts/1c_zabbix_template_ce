@@ -29,11 +29,11 @@ else
     error "Не найдена платформа 1С Предприятия!"
 fi
 
-# Проверить инициализацию переменной CLSTR_CACHE_DIR
-#[[ -z ${CLSTR_CACHE_DIR} ]] && export CLSTR_CACHE_DIR=${CLSTR_CACHE_DIR}
+# Проверить инициализацию переменной TMPDIR
+[[ -z ${TMPDIR} ]] && export TMPDIR="/tmp"
 
 # Файл списка кластеров
-#export CLSTR_CACHE="${CLSTR_CACHE_DIR}/1c_clusters_cache"
+export CLSTR_CACHE="${TMPDIR}/1c_clusters_cache"
 
 # Параметры взаимодействия с сервисом RAS
 RAS_PORTS="1545"
