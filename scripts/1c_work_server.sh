@@ -169,26 +169,26 @@ function get_calls_info {
 
 function get_measures_info {
 
-	[[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
+    [[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
 
-	[[ -n ${2} ]] && APDEX_LIST=${2//,/|} || APDEX_LIST="\"?.*"
+    [[ -n ${2} ]] && APDEX_LIST=${2//,/|} || APDEX_LIST="\"?.*"
 
-	ls ${LOG_DIR}/*.xml >/dev/null 2>&1 || error "Нет файлов для обработки"
+    ls ${LOG_DIR}/*.xml >/dev/null 2>&1 || error "Нет файлов для обработки"
 
-	FILE_MASK=$(find "${LOG_DIR}"/*.xml -maxdepth 1 -type f -print | tail -n 1 | sed -r "s/.*?([0-9\-]{10}\s[0-9\-]{8}).*\.xml/\1/" 2>/dev/null)
+    FILE_MASK=$(find "${LOG_DIR}"/*.xml -maxdepth 1 -type f -print | tail -n 1 | sed -r "s/.*?([0-9\-]{10}\s[0-9\-]{8}).*\.xml/\1/" 2>/dev/null)
 
-	printf "%5s|%10s|%10s|%10s|%s\n" "Apdex" "Avg" "Target" "Count" "Operation"
+    printf "%5s|%10s|%10s|%10s|%s\n" "Apdex" "Avg" "Target" "Count" "Operation"
 
-	put_brack_line
+    put_brack_line
 
-	RESULT=$(grep "" "${LOG_DIR}"/"${FILE_MASK}"*.xml 2>/dev/null |
-		perl -pe 's/\xef\xbb\xbf//g' |
-		sed '/<\/prf:/d' |
-		perl -pe 's/\n/@@/g; s/<prf:KeyOperation/\n<prf:KeyOperation/g' |
-		awk '/<prf:KeyOperation.*?nameFull=".*?('${APDEX_LIST}')/' |
-		perl -pe 's/@@.*?measurement value=\"(.+?)\".*?\/>/$1;/g' |
-		perl -pe 's/.*?targetValue=\"(.+?)\".*?nameFull=\"(.+?)\".*?>/$1ϖ$2ϖ/g' |
-		perl -pe 's/@@//g' |
+    RESULT=$(grep -h "" "${LOG_DIR}"/"${FILE_MASK}"*.xml 2>/dev/null | \
+        perl -pe 's/\xef\xbb\xbf//g' | \
+        sed '/<\/prf/d;/<\?xml/d;/<prf:Performance/d' | \
+        perl -pe 's/\n/@@/g; s/<prf:KeyOperation/\n<prf:KeyOperation/g' | \
+        awk '/<prf:KeyOperation.*?nameFull=".*?('${APDEX_LIST}')/' | \
+        perl -pe 's/@@.*?measurement value=\"(.+?)\".*?weight=\"(.+?)\".*?\/>/$1_$2;/g' | \
+        perl -pe 's/.*?targetValue=\"(.+?)\".*?nameFull=\"(.+?)\".*?>/$1ϖ$2ϖ/g' | \
+        perl -pe 's/@@//g' | \
 		gawk -F'ϖ' '\
             {target=$1; oper=$2; \
             operVal[oper]["target"]=target; \
@@ -199,8 +199,11 @@ function get_measures_info {
             countT=0; \
             count4T=0; \
             for (value in values) { \
-                curValue=values[value]; \
-                if (!curValue) continue; \
+                split(values[value], curValueWeight, "_"); \
+				if (!curValueWeight[1]) continue; \
+				curWeight = curValueWeight[2]; \
+				if (!curWeight||curWeight==0) curWeight=1; \
+				curValue=curValueWeight[1]/curWeight; \
                 sum+=curValue; \
                 count++; \
                 if (curValue<target) countT++; \
@@ -225,13 +228,13 @@ function get_measures_info {
                     operVal[oper]["count"], \
                     oper \
             } \
-            summaryApdex = 1;
-            if (count > 0) summaryApdex=(countT+count4T/2)/count;
+            summaryApdex = 1; \
+            if (count > 0) summaryApdex=(countT+count4T/2)/count; \
             printf "0.0__%s%.2f|%s\n", "!",summaryApdex, "Общий APDEX" \
             }' |
 		sort -n | head -n "${TOP_LIMIT}" | perl -pe 's/0.0__//')
-	echo "${RESULT}"
-
+    echo "${RESULT}"
+    
 }
 
 function get_db_info {
