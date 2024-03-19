@@ -221,18 +221,20 @@ function get_measures_info {
                 count+=operVal[oper]["count"]; \
                 countT+=operVal[oper]["countT"]; \
                 count4T+=operVal[oper]["count4T"]; \
-                printf "%5.2f|%10.3f|%10.2f|%10d|%s\n", \
-                    (operVal[oper]["countT"] + operVal[oper]["count4T"]/2)/operVal[oper]["count"], \
+				apdex = (operVal[oper]["countT"] + operVal[oper]["count4T"]/2)/operVal[oper]["count"]; \
+                printf "%10.2f!|%5.2f|%10.3f|%10.2f|%10d|%s\n", \
+                    (1-apdex)*operVal[oper]["count"], \
+					apdex, \
                     operVal[oper]["value"]/operVal[oper]["count"], \
                     operVal[oper]["target"], \
                     operVal[oper]["count"], \
                     oper \
             } \
-            summaryApdex = 1; \
-            if (count > 0) summaryApdex=(countT+count4T/2)/count; \
-            printf "0.0__%s%.2f|%s\n", "!",summaryApdex, "Общий APDEX" \
+            summaryApdex = 1;
+            if (count > 0) summaryApdex=(countT+count4T/2)/count;
+            printf "9999999999_%s%.2f|%s\n", "!",summaryApdex, "Общий APDEX" \
             }' |
-		sort -n | head -n "${TOP_LIMIT}" | perl -pe 's/0.0__//')
+		sort -rn | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//; s/.+?!\|//')
     echo "${RESULT}"
     
 }
