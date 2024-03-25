@@ -63,7 +63,7 @@ function get_calls_info {
 		gawk -F'ϖ' -v mode="${MODE}" '\
 		{CurDur=$1; Type=$2; Db=$3; Usr=$4; Cntx="Cntx="$5; \
 		Group=Type ":" Db; \
-		if (Type=="WebServer") Group=Group ":" Usr; \
+		if (Type=="WebServer" || Type=="BackgroundJob") Group=Group ":" Usr; \
 		CurMem=$6; CurMemPeak=$7; CurInBytes=$8; CurOutBytes=$9; CurCpuTime=$10; \
 		Dur[Group][Cntx]+=CurDur; \
 		CpuTime[Group][Cntx]+=CurCpuTime; \
