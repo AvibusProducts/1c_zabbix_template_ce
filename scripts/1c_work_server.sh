@@ -109,8 +109,8 @@ function get_calls_info {
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					if (cCpuTime == 0) continue; \
 					SummaryD+=cDur; SummaryC+=cCpuTime; \
-					printf "%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
-					cDur/cCpuTime, (cDur/cCpuTime)/cExecs, cDur, cCpuTime, cExecs, cMemP, cMem, Group, Cntx } } \
+					printf "%12.3f!|%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
+					(cDur/cCpuTime)*cExecs, cDur/cCpuTime, (cDur/cCpuTime)/cExecs, cDur, cCpuTime, cExecs, cMemP, cMem, Group, Cntx } } \
 			if (SummaryC > 0) Summary=SummaryD/SummaryC;
 			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общее соотношение Duration/CPU"; \
 		} \
@@ -163,7 +163,7 @@ function get_calls_info {
 			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общая сумма ввода-вывода"; \
 		} \
 		}' |
-		sort -rn | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//'
+		sort -rn | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//; s/.+?!\|//'
 
 }
 
