@@ -69,39 +69,43 @@ function get_calls_info {
 		CpuTime[Group][Cntx]+=CurCpuTime; \
 		Mem[Group][Cntx]+=CurMem; \
 		Execs[Group][Cntx]+=1; \
+		Types[Group][Cntx]=Type;
 		if (!MemPeak[Group][Cntx] || MemPeak[Group][Cntx] < CurMemPeak) MemPeak[Group][Cntx]=CurMemPeak; \
 		if (mode == "iobytes") { \
 			In[Group][Cntx]+=CurInBytes; \
 			Out[Group][Cntx]+=CurOutBytes; \
 		} \
 		} END \
-		{Koef=1000*1000; KoefMem=1024*1024; Summary=0; \
+		{Koef=1000*1000; KoefMem=1024*1024; Summary=0; SummaryGroups["WebServer"]=0; SummaryGroups["ServerCall"]=0; SummaryGroups["BackgroundJob"]=0;\
 		if (mode == "count") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					Summary+=cExecs; \
+					SummaryGroups[Types[Group][Cntx]]+=cExecs;
 					printf "%10d|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%s\t%s\n", \
 					cExecs, cDur, cCpuTime, cDur/cExecs, cCpuTime/cExecs, cMemP, cMem, Group, Cntx } } \
-			printf "9999999999_%10d|\t%s\n", Summary, "!Общее количество операций"; \
+			printf "9999999999_%10d|\t%s; %d - %s; %d - %s; %d - %s\n", Summary, "!Общее количество операций", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		else if (mode == "cpu") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					Summary+=cCpuTime; \
+					SummaryGroups[Types[Group][Cntx]]+=cCpuTime;
 					printf "%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
 					cCpuTime, cCpuTime/cExecs, cDur, cDur/cExecs, cExecs, cMemP, cMem, Group, Cntx } } \
-			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общая нагрузка CPU"; \
+			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общая нагрузка CPU", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		else if (mode == "duration") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					Summary+=cDur; \
+					SummaryGroups[Types[Group][Cntx]]+=cDur;
 					printf "%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
 					cDur, cDur/cExecs, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } } \
-			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общая длительность операций"; \
+			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общая длительность операций", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		else if (mode == "lazy") { \
 			for (Group in Dur) { \
@@ -109,48 +113,53 @@ function get_calls_info {
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					if (cCpuTime == 0) continue; \
 					SummaryD+=cDur; SummaryC+=cCpuTime; \
+					SummaryGroupsD[Types[Group][Cntx]]+=cDur; SummaryGroupsC[Types[Group][Cntx]]+=cCpuTime; \
 					printf "%12.3f!|%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
 					(cDur/cCpuTime)*cExecs, cDur/cCpuTime, (cDur/cCpuTime)/cExecs, cDur, cCpuTime, cExecs, cMemP, cMem, Group, Cntx } } \
-			if (SummaryC > 0) Summary=SummaryD/SummaryC;
-			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общее соотношение Duration/CPU"; \
+			if (SummaryC > 0) Summary=SummaryD/SummaryC; for (Group in SummaryGroupsD) SummaryGroups[Group]=SummaryGroupsD[Group]/SummaryGroupsC[Group];  \
+			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "Общее соотношение Duration/CPU", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		else if (mode == "dur_avg") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					SummaryD+=cDur; SummaryE+=cExecs; \
+					SummaryGroupsD[Types[Group][Cntx]]+=cDur; SummaryGroupsE[Types[Group][Cntx]]+=cExecs; \
 					printf "%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
 					cDur/cExecs, cDur, cCpuTime, cCpuTime/cExecs, cExecs, cMemP, cMem, Group, Cntx } } \
-			if (SummaryE > 0) Summary=SummaryD/SummaryE;
-			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общее среднее время операций"; \
+			if (SummaryE > 0) Summary=SummaryD/SummaryE; for (Group in SummaryGroupsD) SummaryGroups[Group]=SummaryGroupsD[Group]/SummaryGroupsE[Group];  \
+			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общее среднее время операций", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		else if (mode == "cpu_avg") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
-					SummaryD+=cDur; SummaryE+=cExecs; \
+					SummaryC+=cCpuTime; SummaryE+=cExecs; \
+					SummaryGroupsC[Types[Group][Cntx]]+=cCpuTime; SummaryGroupsE[Types[Group][Cntx]]+=cExecs; \
 					printf "%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
 					cCpuTime/cExecs, cCpuTime, cDur, cDur/cExecs, cExecs, cMemP, cMem, Group, Cntx } } \
-			if (SummaryE > 0) Summary=SummaryD/SummaryE;
-			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общая средняя нагрузка операций на CPU"; \
+			if (SummaryE > 0) Summary=SummaryC/SummaryE; for (Group in SummaryGroupsC) SummaryGroups[Group]=SummaryGroupsC[Group]/SummaryGroupsE[Group];  \
+			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общая средняя нагрузка операций на CPU", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		else if (mode == "memorypeak") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					if (Summary < cMemP) Summary=cMemP; \
+					if (SummaryGroups[Types[Group][Cntx]] < cMemP) SummaryGroups[Types[Group][Cntx]]=cMemP; \
 					printf "%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%10d|%s\t%s\n", \
 					cMemP, cMemP/cExecs, cMem, cMem/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } } \
-			printf "9999999999_%12.3f|\t%s\n", Summary, "!Максимальная потребленная память за вызов"; \
+			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Максимальная потребленная память за вызов", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		else if (mode == "memory") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					Summary+=cMem; \
+					SummaryGroups[Types[Group][Cntx]]+=cMem;
 					printf "%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%10d|%s\t%s\n", \
 					cMem, cMem/cExecs, cMemP, cMemP/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } } \
-			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общая не освобожденная память"; \
+			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общая не освобожденная память", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		else if (mode == "iobytes") { \
 			for (Group in Dur) { \
@@ -158,9 +167,10 @@ function get_calls_info {
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
 					cIn=In[Group][Cntx]/KoefMem; cOut=Out[Group][Cntx]/KoefMem; \
 					Summary+=(cIn+cOut); \
+					SummaryGroups[Types[Group][Cntx]]+=(cIn+cOut);
 					printf "%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%10d|%s\t%s\n", \
 					cIn+cOut, (cIn+cOut)/cExecs, cIn, cOut, cDur, cCpuTime, cExecs, Group, Cntx } } \
-			printf "9999999999_%12.3f|\t%s\n", Summary, "!Общая сумма ввода-вывода"; \
+			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общая сумма ввода-вывода", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		}' |
 		sort -rn | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//; s/.+?!\|//'
