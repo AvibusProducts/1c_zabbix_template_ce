@@ -117,7 +117,7 @@ function get_calls_info {
 					printf "%12.3f!|%12.3f|%12.3f|%12.3f|%12.3f|%10d|%12.3f|%12.3f|%s\t%s\n", \
 					(cDur/cCpuTime)*cExecs, cDur/cCpuTime, (cDur/cCpuTime)/cExecs, cDur, cCpuTime, cExecs, cMemP, cMem, Group, Cntx } } \
 			if (SummaryC > 0) Summary=SummaryD/SummaryC; for (Group in SummaryGroupsD) SummaryGroups[Group]=SummaryGroupsD[Group]/SummaryGroupsC[Group];  \
-			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "Общее соотношение Duration/CPU", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
+			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общее соотношение Duration/CPU", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		else if (mode == "dur_avg") { \
 			for (Group in Dur) { \
