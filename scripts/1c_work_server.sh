@@ -227,7 +227,7 @@ function get_measures_info {
             count=0; \
             countT=0; \
             count4T=0; \
-            for (oper in operVal) {\
+			for (oper in operVal) {\
                 count+=operVal[oper]["count"]; \
                 countT+=operVal[oper]["countT"]; \
                 count4T+=operVal[oper]["count4T"]; \
@@ -242,7 +242,7 @@ function get_measures_info {
             } \
             summaryApdex = 1;
             if (count > 0) summaryApdex=(countT+count4T/2)/count;
-            printf "9999999999_%s%.2f|%s\n", "!",summaryApdex, "Общий APDEX" \
+            printf "9999999999_%s%.2f|%s; %d - %s\n", "!",summaryApdex, "Общий APDEX", count, "Всего операций" \
             }' |
 		sort -rn | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//; s/.+?!\|//')
     echo "${RESULT}"
