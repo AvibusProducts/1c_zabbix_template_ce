@@ -2,7 +2,6 @@
 #
 # Мониторинг 1С Предприятия 8.3 (общие переменные и функции)
 #
-
 #set -x
 
 # Вывести сообщение об ошибке переданное в аргументе и выйти с кодом 1
@@ -29,11 +28,11 @@ else
     error "Не найдена платформа 1С Предприятия!"
 fi
 
-# Проверить инициализацию переменной TMPDIR
-[[ -z ${TMPDIR} ]] && export TMPDIR="/tmp"
+# Проверить инициализацию переменной CLSTR_CACHE_DIR
+#[[ -z ${CLSTR_CACHE_DIR} ]] && export CLSTR_CACHE_DIR=${CLSTR_CACHE_DIR}
 
 # Файл списка кластеров
-export CLSTR_CACHE="${TMPDIR}/1c_clusters_cache"
+#export CLSTR_CACHE="${CLSTR_CACHE_DIR}/1c_clusters_cache"
 
 # Параметры взаимодействия с сервисом RAS
 RAS_PORTS="1545"
@@ -197,7 +196,7 @@ function get_processes_perfomance {
     CLSTR_LIST=${1#*#}
 
     for CURR_CLSTR in ${CLSTR_LIST//;/ }; do
-        timeout -s HUP "${RAS_TIMEOUT}" rac process list "--cluster=${CURR_CLSTR%%,*}" \
+		timeout -s HUP "${RAS_TIMEOUT}" rac process list "--cluster=${CURR_CLSTR%%,*}" \
             ${RAS_AUTH} "${1%#*}" 2>/dev/null | \
             awk '/^(host|available-perfomance|$)/' | perl -pe "s/.*: ([^.]+).*\n/\1:/" | \
             awk -F: '{ apc[$1]+=1; aps[$1]+=$2 } END { for (i in apc) { print i":"aps[i]/apc[i] } }'

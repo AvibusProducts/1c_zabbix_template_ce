@@ -30,6 +30,10 @@ function check_measures_dir {
 	mkdir "${1}/processed" 2>/dev/null
 }
 
+function check_cache_dir {
+    [[ -d "${1}" ]] || error "Неверно задан каталог хранения кэша данных кластера!"
+}
+
 function get_calls_info {
 
 	MODE=${1}
@@ -666,6 +670,10 @@ case ${1} in
     calls | locks | excps | cluster) check_log_dir "${2}" "${1}";
         export LOG_FILE=$(date --date="last hour" "+%y%m%d%H");
         export LOG_DIR="${2%/}/zabbix/${1}" ;;&
+	perfomance) check_cache_dir "${2}";
+        export CLSTR_CACHE_DIR="${2}";
+		export CLSTR_CACHE="${CLSTR_CACHE_DIR}/1c_clusters_cache";
+		export IB_CACHE="${CLSTR_CACHE_DIR}/1c_infobase_cache";;&
     excps) PROCESS_NAMES=(ragent rmngr rphost) ;;&
     calls) shift 2; get_calls_info "${@}" ;;
     measures) check_measures_dir "${2}";
@@ -686,6 +694,6 @@ case ${1} in
 	cpu_memory_list) shift; get_cpu_memory_list "${@}";;
     ram) get_physical_memory ;;
     dump_logs) shift; dump_logs "${@}" ;;
-    perfomance) shift; make_ras_params "${@}"; get_available_perfomance ;;
+    perfomance) shift 2; make_ras_params "${@}"; get_available_perfomance ;;
     *) error "${ERROR_UNKNOWN_MODE}" ;;
 esac
