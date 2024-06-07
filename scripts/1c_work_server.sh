@@ -26,8 +26,6 @@ function check_log_dir {
 
 function check_measures_dir {
 	[[ ! -d "${1}/" ]] && error "Неверно задан каталог замеров времени!"
-	mkdir "${1}/inprocess" 2>/dev/null
-	mkdir "${1}/processed" 2>/dev/null
 }
 
 function check_cache_dir {
@@ -191,7 +189,7 @@ function get_measures_info {
 
     FILE_MASK=$(find "${LOG_DIR}"/*.xml -maxdepth 1 -type f -print | tail -n 1 | sed -r "s/.*?([0-9\-]{10}\s[0-9\-]{8}).*\.xml/\1/" 2>/dev/null)
 
-    printf "%5s|%10s|%10s|%10s|%s\n" "Apdex" "Avg" "Target" "Count" "Operation"
+    printf "%5s|%10s|%10s|%10s|%10s|%s\n" "Apdex" "Avg" "Sum" "Target" "Count" "Operation"
 
     put_brack_line
 
@@ -203,7 +201,7 @@ function get_measures_info {
         perl -pe 's/@@.*?measurement value=\"(.+?)\".*?weight=\"(.+?)\".*?\/>/$1_$2;/g' | \
         perl -pe 's/.*?targetValue=\"(.+?)\".*?nameFull=\"(.+?)\".*?>/$1ϖ$2ϖ/g' | \
         perl -pe 's/@@//g' | \
-		gawk -F'ϖ' '\
+		gawk -F'ϖ' -v list="${APDEX_LIST}" '\
             {target=$1; oper=$2; \
             operVal[oper]["target"]=target; \
             split($3, values, ";"); \
@@ -231,22 +229,26 @@ function get_measures_info {
             count=0; \
             countT=0; \
             count4T=0; \
+			sum=0; \
 			for (oper in operVal) {\
+				if (list == "\"?.*" && index(oper, "Bench")) continue;
                 count+=operVal[oper]["count"]; \
                 countT+=operVal[oper]["countT"]; \
                 count4T+=operVal[oper]["count4T"]; \
-				apdex = (operVal[oper]["countT"] + operVal[oper]["count4T"]/2)/operVal[oper]["count"]; \
-                printf "%10.2f!|%5.2f|%10.3f|%10.2f|%10d|%s\n", \
+				apdex=(operVal[oper]["countT"] + operVal[oper]["count4T"]/2)/operVal[oper]["count"]; \
+				sum+=operVal[oper]["value"]; \
+                printf "%10.2f!|%5.2f|%10.3f|%10.3f|%10.2f|%10d|%s\n", \
                     (1-apdex)*operVal[oper]["count"], \
 					apdex, \
                     operVal[oper]["value"]/operVal[oper]["count"], \
+					operVal[oper]["value"], \
                     operVal[oper]["target"], \
                     operVal[oper]["count"], \
                     oper \
             } \
             summaryApdex = 1;
             if (count > 0) summaryApdex=(countT+count4T/2)/count;
-            printf "9999999999_%s%.2f|%s; %d - %s\n", "!",summaryApdex, "Общий APDEX", count, "Всего операций" \
+            printf "9999999999_%s%.2f|%s; %d - %s; %.3f - %s\n", "!",summaryApdex, "Общий APDEX", count, "Всего операций", sum, "Суммарное время" \
             }' |
 		sort -rn | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//; s/.+?!\|//')
     echo "${RESULT}"
