@@ -63,6 +63,12 @@
 		<property name="descr"/>
 		<property name="context"/>
 	</log>
+	<log location="{{tech_logs_dir}}/zabbix/lic" history="1">
+		<event>
+			<eq property="name" value="LIC"/>
+		</event>
+		<property name="all"/>
+    </log>
 	<!--<log location="{{tech_logs_dir}}/zabbix/db_summary" history="1">
 		<event>
 			<eq property="name" value="DBPOSTGRS"/>
