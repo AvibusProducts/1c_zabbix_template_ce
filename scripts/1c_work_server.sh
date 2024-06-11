@@ -516,6 +516,31 @@ function get_cluster_events_info {
 
 }
 
+function get_lic_errors_info {
+
+	[[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
+
+	grep -H "" "${LOG_DIR}"/*/"${LOG_FILE}.log" 2>/dev/null |
+		perl -pe 's/\xef\xbb\xbf//g' |
+		perl -pe 's/^.*\d{8}\.log:$//g' |
+		awk "/^.*[0-9]{8}\.log:/" |
+		perl -pe 's/^.*[\/\\](.*?_\d+)[\/\\]\d{8}\.log:(\d{2}:\d{2})\.(\d{6})-(\d+)/\1,\4/g' |
+		perl -pe 's/^.*\d{8}\.log://g' |
+		perl -pe 's/[\r\n]+/@@/g; s/(.+?_\d+)/\n\1/g' |
+		awk '/,LIC,.+res=error.+/' |
+		perl -pe 's/(.+?)_(.+?),.*?Func=(.*?),.*?txt=(.*?)($|["],.*$)/\1ϖ\2ϖ\3ϖ\4/' |
+		gawk -F'ϖ' '\
+		{Proc=$1; ProcID=$2;Func=$3;Descr=$4; \
+		Group=Proc "\t" Func "\t" Descr; \
+		Execs[Group]+=1; } END \
+		{for (Group in Execs) \
+			printf "%d\t%s\n", Execs[Group], Group}' |
+		sort -rn |
+		head -n "${TOP_LIMIT}" |
+		perl -pe 's/@@/\n\t/g'
+
+}
+
 function get_memory_counts {
 
 	RPHOST_PID_HASH="${TMPDIR}/1c_rphost_pid_hash"
@@ -692,6 +717,7 @@ case ${1} in
 	locks) shift 2; get_locks_info "${@}" ;;
     excps) shift 2; get_excps_info "${@}" ;;
 	cluster) shift 2; get_cluster_events_info "${@}" ;;
+	lic) shift 2; get_lic_errors_info "${@}" ;;
 	memory) get_memory_counts ;;
 	cpu_memory_list) shift; get_cpu_memory_list "${@}";;
     ram) get_physical_memory ;;
