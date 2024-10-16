@@ -3,6 +3,8 @@
 # Мониторинг 1С Предприятия 8.3 (сервер лицензирования)
 #
 
+#set -x
+
 WORK_DIR=$(dirname "${0}" | sed -r 's/\\/\//g; s/^(.{1}):/\/\1/')
 
 # Включить опцию extglob если отключена (используется в 1c_common_module.sh)
@@ -113,8 +115,12 @@ function check_cluster_process {
 }
 
 case ${1} in
+	used|infobases|clusters) check_cache_dir "${2}";
+        export CLSTR_CACHE_DIR="${2}";
+		export CLSTR_CACHE="${CLSTR_CACHE_DIR}/1c_clusters_cache";
+		export IB_CACHE="${CLSTR_CACHE_DIR}/1c_infobase_cache";;&
     process) CLSTR_UUID=${2}; CHECK_MODE=${3} ; shift 2 ;;&
-    used|infobases|clusters|process) shift; make_ras_params "${@}" ;;&
+    used|infobases|clusters|process) shift 2; make_ras_params "${@}" ;;&
     used) used_license ;;
     infobases) get_infobases_list;;
     clusters) get_clusters_list ;;
