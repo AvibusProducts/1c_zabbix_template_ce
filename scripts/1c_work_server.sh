@@ -247,8 +247,12 @@ function get_measures_info {
                     oper \
             } \
             summaryApdex = 1;
-            if (count > 0) summaryApdex=(countT+count4T/2)/count;
-            printf "9999999999_%s%.2f|%s; %d - %s; %.3f - %s\n", "!",summaryApdex, "Общий APDEX", count, "Всего операций", sum, "Суммарное время" \
+			summaryAvg = 0;
+            if (count > 0) {
+				summaryApdex=(countT+count4T/2)/count;
+				summaryAvg=sum/count;
+			}
+            printf "9999999999_%s%.2f|%s; %d - %s; %.3f - %s; %.3f - %s\n", "!",summaryApdex, "Общий APDEX", count, "Всего операций", sum, "Суммарное время", summaryAvg, "Среднее время" \
             }' |
 		sort -rn | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//; s/.+?!\|//')
     echo "${RESULT}"
