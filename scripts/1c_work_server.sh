@@ -456,6 +456,12 @@ function get_excps_info {
 		shift 1
 		get_excps_list_info "${@}"
 		;;
+	list_current)
+		shift 1
+		export LOG_FILE=$(date --date="this hour" "+%y%m%d%H");
+		export LOG_TIME=$(date --date="1 minute ago" "+%M");
+		get_excps_current_list_info "${@}"
+		;;
 	*) get_excps_summary_info "${@}" ;;
 	esac
 
@@ -492,6 +498,33 @@ function get_excps_list_info {
 		sort -rn |
 		head -n "${TOP_LIMIT}" |
 		perl -pe 's/@@/\n\t/g'
+
+}
+
+function get_excps_current_list_info {
+
+	[[ -n ${1} ]] && TOP_LIMIT=${1} || TOP_LIMIT=25
+	[[ -n ${2} ]] && EXCP_FILTER=${2//,/|} || EXCP_FILTER="\"?.*"
+
+	grep -H "" "${LOG_DIR}"/*/"${LOG_FILE}.log" 2>/dev/null |
+	perl -pe 's/\xef\xbb\xbf//g' |
+	perl -pe 's/^.*\d{8}\.log:$//g' |
+	awk "/^.*[0-9]{8}\.log:/" |
+	perl -pe 's/^.*[\/\\](.*?_\d+)[\/\\]\d{8}\.log:(\d{2}):(\d{2})\.(\d{6})-(\d+)/\1,\2,\5/g' |
+	perl -pe 's/^.*\d{8}\.log://g' |
+	perl -pe 's/[\r\n]+/@@/g; s/(.+?_\d+)/\n\1/g' |
+	awk '/.+?_[0-9]+,'${LOG_TIME}'.*('${EXCP_FILTER}')/' |
+	awk '/,EXCP,.+Descr=.+/' |
+	perl -pe 's/(.+?)_(.+?),.*?Descr=(.*?)($|,.*$)/\1ϖ\2ϖ\3/' |
+	gawk -F'ϖ' '\
+		{Proc=$1; ProcID=$2; Descr=$3; \
+		Group=Proc "\t" Descr; \
+		Execs[Group]+=1; } END \
+		{for (Group in Execs) \
+			printf "%d\t%s\n", Execs[Group], Group}' |
+	sort -rn |
+	head -n "${TOP_LIMIT}" |
+	perl -pe 's/@@/\n\t/g'
 
 }
 

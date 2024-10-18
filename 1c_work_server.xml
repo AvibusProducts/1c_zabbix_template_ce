@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
-    <version>6.0</version>
-    <date>2023-10-19T19:07:57Z</date>
-    <groups>
-        <group>
+    <version>6.4</version>
+    <template_groups>
+        <template_group>
             <uuid>d83f326f893144b0b86d0e7c36a5b1d9</uuid>
             <name>Templates/1C</name>
-        </group>
-        <group>
+        </template_group>
+        <template_group>
             <uuid>a571c0d144b14fd4a87a9d9b2aa9fcd6</uuid>
             <name>Templates/Applications</name>
-        </group>
-    </groups>
+        </template_group>
+    </template_groups>
     <templates>
         <template>
             <uuid>6e363c61459046aab79cc210625ccbd8</uuid>
@@ -158,6 +157,14 @@
                             <value>[1С] Производительность</value>
                         </tag>
                     </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>47cf7017a1b74d6e8838ce8ec7407979</uuid>
+                            <expression>last(/Template App 1C Enterprise Work Server/1c.ws.calls.lazy)&gt;{$MAX_LAZY_CALLS}</expression>
+                            <name>[1С/Серверные вызовы] Слишком высокий коэффициент &quot;ленивых&quot; вызовов</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
                 </item>
                 <item>
                     <uuid>882fb21d07e94b2b85cb5a46e5481e4a</uuid>
@@ -166,12 +173,19 @@
                     <key>1c.ws.calls.memory</key>
                     <delay>0</delay>
                     <value_type>FLOAT</value_type>
+                    <units>B</units>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
                             <parameters>
                                 <parameter>(\d+\.\d*).*?!Общ</parameter>
                                 <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <parameters>
+                                <parameter>1048576</parameter>
                             </parameters>
                         </step>
                     </preprocessing>
@@ -192,12 +206,19 @@
                     <key>1c.ws.calls.memorypeak</key>
                     <delay>0</delay>
                     <value_type>FLOAT</value_type>
+                    <units>B</units>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
                             <parameters>
                                 <parameter>(\d+\.\d*).*?!Макс</parameter>
                                 <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <parameters>
+                                <parameter>1048576</parameter>
                             </parameters>
                         </step>
                     </preprocessing>
@@ -344,10 +365,9 @@
                 <item>
                     <uuid>92c60fc85200490cb5bf6c1edee59aaf</uuid>
                     <name>[1С/СУБД] ТОП длительности запросов на СУБД</name>
-                    <key>1c.ws.db[{$LOG_DIR},{$TOP_LIST_SIZE}]</key>
+                    <key>1c.ws.db[{$LOG_DIR},list,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m1</delay>
                     <trends>0</trends>
-                    <status>DISABLED</status>
                     <value_type>TEXT</value_type>
                     <tags>
                         <tag>
@@ -362,7 +382,6 @@
                     <key>1c.ws.db_summary[{$LOG_DIR}]</key>
                     <delay>0;m1</delay>
                     <trends>0</trends>
-                    <status>DISABLED</status>
                     <value_type>TEXT</value_type>
                     <tags>
                         <tag>
@@ -390,12 +409,56 @@
                     </tags>
                 </item>
                 <item>
+                    <uuid>249204b33f304bf0979e5d7249327c4b</uuid>
+                    <name>[1С/Рабочий сервер] ТОП текущих ошибок кластера</name>
+                    <key>1c.ws.excps[{$LOG_DIR},list_current,{$TOP_LIST_SIZE},{$EXCP_FILTER}]</key>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>TEXT</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Информация</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Ошибки</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>1856ce1015f442538e96529cf734be9d</uuid>
+                            <expression>nodata(/Template App 1C Enterprise Work Server/1c.ws.excps[{$LOG_DIR},list_current,{$TOP_LIST_SIZE},{$EXCP_FILTER}],1m)=0</expression>
+                            <name>[1С/APDEX] Общее значение APDEX нет данных</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
                     <uuid>f58f9a3a0b224db8b673dec068bcac65</uuid>
                     <name>[1С/Рабочий сервер] Ошибки процессов</name>
                     <type>ZABBIX_ACTIVE</type>
                     <key>1c.ws.excps[{$LOG_DIR}]</key>
                     <delay>0;m2</delay>
                     <history>0</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Информация</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Ошибки</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>6997075b6de94b22924e88c475f5a251</uuid>
+                    <name>[1С/Рабочий сервер] ТОП ошибок лицензирования</name>
+                    <key>1c.ws.lic[{$LOG_DIR},{$TOP_LIST_SIZE}]</key>
+                    <delay>0;m1</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <tags>
@@ -602,7 +665,7 @@
                     <uuid>c07ad83d27e342c9bf27fb8ed6508f75</uuid>
                     <name>[1С/Блокировки] ТОП блокировок</name>
                     <key>1c.ws.locks[{$LOG_DIR},{$MAX_LOCK_WAIT},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS},list,{$TOP_LIST_SIZE}]</key>
-                    <delay>0;m2</delay>
+                    <delay>0;m4</delay>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
                     <tags>
@@ -660,6 +723,12 @@
                         </tag>
                     </tags>
                     <triggers>
+                        <trigger>
+                            <uuid>2fbdbbc810c4480e86277b25de7cce13</uuid>
+                            <expression>nodata(/Template App 1C Enterprise Work Server/1c.ws.measures.apdex,1h)=1</expression>
+                            <name>[1С/APDEX] Общее значение APDEX нет данных</name>
+                            <priority>DISASTER</priority>
+                        </trigger>
                         <trigger>
                             <uuid>b29bc6d692344c69b8daeb2932fe36ea</uuid>
                             <expression>last(/Template App 1C Enterprise Work Server/1c.ws.measures.apdex)&lt;{$MIN_APDEX}</expression>
@@ -737,6 +806,147 @@
                     </triggers>
                 </item>
                 <item>
+                    <uuid>7c77c6491921476db003ae42475dfa03</uuid>
+                    <name>[1С/APDEX] Benchmark</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.measures.benchmark</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>операций;.+?(\d+\.\d*)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE},{$APDEX_LIST_BENCH}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>d3d166c1afc84a6b9f5123e7768a6182</uuid>
+                    <name>[1С/APDEX] Benchmark Avg</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.measures.benchmark_avg</key>
+                    <delay>0</delay>
+                    <value_type>FLOAT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>(\d+\.\d*) - Среднее</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE},{$APDEX_LIST_BENCH}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>034e6ab76670454aada8d0d07c9a4773</uuid>
+                    <name>[1С/APDEX] Количество замеров</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.measures.count</key>
+                    <delay>0</delay>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>APDEX;.+?(\d*)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>c96fb940be554ca492b9aa1ce0fcd0a5</uuid>
+                    <name>[1С/APDEX] Количество замеров Пользователи</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.measures.count_cln</key>
+                    <delay>0</delay>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>APDEX;.+?(\d*)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE},{$APDEX_LIST_CLN}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>e381869a38af4ac2aad0e41e5f16178a</uuid>
+                    <name>[1С/APDEX] Количество замеров WEB</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.measures.count_web</key>
+                    <delay>0</delay>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>APDEX;.+?(\d*)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE},{$APDEX_LIST_WEB}]</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>ae5c005cf08642c48440f06abff401e3</uuid>
+                    <name>[1С/APDEX] ТОП операций Benchmark</name>
+                    <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE},{$APDEX_LIST_BENCH}]</key>
+                    <delay>0;m0,15,30,45s40</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
                     <uuid>c545ffdb96e3499cb10e4e886e1f25fe</uuid>
                     <name>[1С/APDEX] ТОП операций с худшим APDEX Пользователи</name>
                     <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE},{$APDEX_LIST_CLN}]</key>
@@ -799,13 +1009,133 @@
                     </tags>
                 </item>
                 <item>
+                    <uuid>bc34da186677432194881ec4b79847f8</uuid>
+                    <name>[1С/MSSQL][Workmem] Объем памяти СУБД</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.mssql.memory</key>
+                    <delay>0</delay>
+                    <units>B</units>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>sqlservr: \d+ (\d+) \d</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.memory</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1C] Использование ресурсов</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>84fab8c44c1e4b60875ab886c0e5f2fe</uuid>
+                    <name>[1С/MSSQL][Virtualmem] Объем памяти СУБД</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.mssql.vmemory</key>
+                    <delay>0</delay>
+                    <units>B</units>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>sqlservr: \d+ \d+ (\d+)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.memory</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1C] Использование ресурсов</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
                     <uuid>0200a7d31c284f49a6a4b864c280585c</uuid>
                     <name>[1С/Рабочий процесс] Доступная производительность</name>
                     <type>ZABBIX_ACTIVE</type>
-                    <key>1c.ws.perfs[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                    <key>1c.ws.perfs[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     <value_type>FLOAT</value_type>
                     <description>Среднее значение доступной производительности рабочих процессов данного сервера</description>
                     <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>42844b3c79b946de9e032fad064fb3fc</uuid>
+                    <name>[1С/Postgres][Workmem] Объем памяти СУБД</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.postgres.memory</key>
+                    <delay>0</delay>
+                    <units>B</units>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>postgres: \d+ (\d+) \d</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.memory</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1C] Использование ресурсов</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>e9d43273bc8f4be7aa1225a7040a6e3f</uuid>
+                    <name>[1С/Postgres][Virtualmem] Объем памяти СУБД</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.postgres.vmemory</key>
+                    <delay>0</delay>
+                    <units>B</units>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>postgres: \d+ \d+ (\d+)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.memory</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1C] Использование ресурсов</value>
+                        </tag>
                         <tag>
                             <tag>Application</tag>
                             <value>[1С] Производительность</value>
@@ -917,6 +1247,10 @@
                     <tags>
                         <tag>
                             <tag>Application</tag>
+                            <value>[1C] Использование ресурсов</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
                             <value>[1С] Производительность</value>
                         </tag>
                     </tags>
@@ -1007,6 +1341,10 @@
                     <tags>
                         <tag>
                             <tag>Application</tag>
+                            <value>[1C] Использование ресурсов</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
                             <value>[1С] Производительность</value>
                         </tag>
                     </tags>
@@ -1091,7 +1429,7 @@
                 </item>
                 <item>
                     <uuid>9c10714494de410bbf7efdbd9d0d7e6c</uuid>
-                    <name>[1С/Рабочий процесс] Объем памяти всех процессов</name>
+                    <name>[1С/Рабочий процесс][Workmem] Объем памяти всех процессов</name>
                     <type>DEPENDENT</type>
                     <key>1c.ws.rphost.memory</key>
                     <delay>0</delay>
@@ -1111,6 +1449,40 @@
                     <tags>
                         <tag>
                             <tag>Application</tag>
+                            <value>[1C] Использование ресурсов</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1С] Производительность</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>fad28c1cf481417cac087b7c2964f898</uuid>
+                    <name>[1С/Рабочий процесс][Virtualmem] Объем памяти всех процессов</name>
+                    <type>DEPENDENT</type>
+                    <key>1c.ws.rphost.vmemory</key>
+                    <delay>0</delay>
+                    <units>B</units>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>rphost: \d+ \d+ (\d+)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>1c.ws.memory</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>[1C] Использование ресурсов</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
                             <value>[1С] Производительность</value>
                         </tag>
                     </tags>
@@ -1118,14 +1490,32 @@
             </items>
             <macros>
                 <macro>
+                    <macro>{$APDEX_LIST_BENCH}</macro>
+                    <value>Benchmark</value>
+                </macro>
+                <macro>
                     <macro>{$APDEX_LIST_CLN}</macro>
                     <value>РМК,ЗаказКлиента</value>
                     <description>Список пользовательских ключевых операций</description>
                 </macro>
                 <macro>
                     <macro>{$APDEX_LIST_WEB}</macro>
-                    <value>StartSaleSession,AddTickets,Payment,GetTrips</value>
+                    <value>SalePort,StartSaleSession,AddTickets,Payment,GetTrips</value>
                     <description>Список ключевых операций веб-запросов</description>
+                </macro>
+                <macro>
+                    <macro>{$CLSTR_CACHE_DIR}</macro>
+                    <value>/var/log/1c/zabbix/cluster_cache</value>
+                    <description>Директория для формирования временных данных - кэш данных кластера, например</description>
+                </macro>
+                <macro>
+                    <macro>{$COUNT_CHECKS}</macro>
+                    <value>#20</value>
+                    <description>Количество проверок</description>
+                </macro>
+                <macro>
+                    <macro>{$EXCP_FILTER}</macro>
+                    <value>лиценз</value>
                 </macro>
                 <macro>
                     <macro>{$EXCP_THRESHOLD}</macro>
@@ -1136,6 +1526,11 @@
                     <macro>{$LOG_DIR}</macro>
                     <value>/var/log/1c/</value>
                     <description>Каталог технологического журнала</description>
+                </macro>
+                <macro>
+                    <macro>{$MAX_LAZY_CALLS}</macro>
+                    <value>4</value>
+                    <description>Максимальный порог коэффициента &quot;ленивых&quot; вызовов</description>
                 </macro>
                 <macro>
                     <macro>{$MAX_LOCK_WAIT}</macro>
@@ -1482,7 +1877,7 @@
                     <yaxisside>RIGHT</yaxisside>
                     <item>
                         <host>Template App 1C Enterprise Work Server</host>
-                        <key>1c.ws.perfs[{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
+                        <key>1c.ws.perfs[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     </item>
                 </graph_item>
                 <graph_item>
