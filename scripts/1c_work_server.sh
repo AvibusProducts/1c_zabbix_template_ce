@@ -175,7 +175,7 @@ function get_calls_info {
 			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общая сумма ввода-вывода", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		}' |
-		sort -rn | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//; s/.+?!\|//'
+		sort -rn 2>/dev/null | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//; s/.+?!\|//'
 
 }
 
@@ -254,7 +254,7 @@ function get_measures_info {
 			}
             printf "9999999999_%s%.2f|%s; %d - %s; %.3f - %s; %.3f - %s\n", "!",summaryApdex, "Общий APDEX", count, "Всего операций", sum, "Суммарное время", summaryAvg, "Среднее время" \
             }' |
-		sort -rn | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//; s/.+?!\|//')
+		sort -rn 2>/dev/null | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//; s/.+?!\|//')
     echo "${RESULT}"
     
 }
@@ -295,7 +295,7 @@ function get_db_summary_info {
 			(Dur[Group]/Koef)/Execs[Group], \
 			Max[Group]/Koef, \
 			Group}' |
-		sort -rn |
+		sort -rn 2>/dev/null |
 		head -n "${TOP_LIMIT}"
 
 }
@@ -333,7 +333,7 @@ function get_db_list_info {
 			(Dur[Group][Cntx]/Koef)/Execs[Group][Cntx], \
 			Max[Group][Cntx]/Koef, \
 			Group, Cntx}' |
-		sort -rn |
+		sort -rn 2>/dev/null |
 		head -n "${TOP_LIMIT}" |
 		perl -pe 's/@@/\n/g'
 
@@ -441,7 +441,7 @@ function get_locks_list_info {
 				Group, Cntx; \
 		printf "9999999999_%12.3f - %s\n", DurWCSum/Koef, "!Общее время ожидания блокировок"; \
 		}' |
-		sort -rn |
+		sort -rn 2>/dev/null |
 		head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//' |
 		perl -pe 's/@@/\n/g'
 
@@ -495,7 +495,7 @@ function get_excps_list_info {
 		Execs[Group]+=1; } END \
 		{for (Group in Execs) \
 			printf "%d\t%s\n", Execs[Group], Group}' |
-		sort -rn |
+		sort -rn 2>/dev/null |
 		head -n "${TOP_LIMIT}" |
 		perl -pe 's/@@/\n\t/g'
 
@@ -522,7 +522,7 @@ function get_excps_current_list_info {
 		Execs[Group]+=1; } END \
 		{for (Group in Execs) \
 			printf "%d\t%s\n", Execs[Group], Group}' |
-	sort -rn |
+	sort -rn 2>/dev/null |
 	head -n "${TOP_LIMIT}" |
 	perl -pe 's/@@/\n\t/g'
 
@@ -547,7 +547,7 @@ function get_cluster_events_info {
 		Execs[Group]+=1; } END \
 		{for (Group in Execs) \
 			printf "%d\t%s\n", Execs[Group], Group}' |
-		sort -rn |
+		sort -rn 2>/dev/null |
 		head -n "${TOP_LIMIT}" |
 		perl -pe 's/@@/\n\t/g'
 
@@ -572,7 +572,7 @@ function get_lic_errors_info {
 		Execs[Group]+=1; } END \
 		{for (Group in Execs) \
 			printf "%d\t%s\n", Execs[Group], Group}' |
-		sort -rn |
+		sort -rn 2>/dev/null |
 		head -n "${TOP_LIMIT}" |
 		perl -pe 's/@@/\n\t/g'
 
@@ -695,7 +695,7 @@ function get_cpu_memory_list {
 					}
 				}
 			}' |
-		sort -rn | head -n 15 | perl -pe 's/999999999999999//'
+		sort -rn 2>/dev/null | head -n 15 | perl -pe 's/999999999999999//'
 }
 
 # Архивирование файлов ТЖ с именем ${2} из каталога ${1} в problem_log
