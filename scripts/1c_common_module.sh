@@ -28,11 +28,18 @@ else
     error "Не найдена платформа 1С Предприятия!"
 fi
 
+function check_cache_dir {
+    [[ -d "${1}" ]] || error "Неверно задан каталог хранения кэша данных кластера!"
+}
+
 # Проверить инициализацию переменной CLSTR_CACHE_DIR
-#[[ -z ${CLSTR_CACHE_DIR} ]] && export CLSTR_CACHE_DIR=${CLSTR_CACHE_DIR}
+[[ -z ${CLSTR_CACHE_DIR} ]] && export CLSTR_CACHE_DIR=${CLSTR_CACHE_DIR}
 
 # Файл списка кластеров
-#export CLSTR_CACHE="${CLSTR_CACHE_DIR}/1c_clusters_cache"
+export CLSTR_CACHE="${CLSTR_CACHE_DIR}/1c_clusters_cache"
+
+# Файл списка информационных баз
+export IB_CACHE=${CLSTR_CACHE_DIR}/1c_infobase_cache
 
 # Параметры взаимодействия с сервисом RAS
 RAS_PORTS="1545"
@@ -45,9 +52,6 @@ MAX_THREADS=$(( $(nproc) / 2 )) && [[ ${MAX_THREADS} -eq 0 ]] && MAX_THREADS=1
 # Общие для всех скриптов тексты ошибок
 export ERROR_UNKNOWN_MODE="Неизвестный режим работы скрипта!"
 export ERROR_UNKNOWN_PARAM="Неизвестный параметр для данного режима работы скрипта!"
-
-# Файл списка информационных баз
-#export IB_CACHE=${CLSTR_CACHE_DIR}/1c_infobase_cache
 
 # Вывести разделительную строку длинной ${1} из символов ${2}
 # По-умолчанию раделительная строка - это 80 символов "-"

@@ -28,10 +28,6 @@ function check_measures_dir {
 	[[ ! -d "${1}/" ]] && error "Неверно задан каталог замеров времени!"
 }
 
-function check_cache_dir {
-    [[ -d "${1}" ]] || error "Неверно задан каталог хранения кэша данных кластера!"
-}
-
 function get_calls_info {
 
 	MODE=${1}

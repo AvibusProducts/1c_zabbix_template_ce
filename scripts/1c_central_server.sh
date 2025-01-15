@@ -12,10 +12,6 @@ shopt -q extglob || shopt -s extglob
 
 source "${WORK_DIR}/1c_common_module.sh" 2>/dev/null || { echo "ОШИБКА: Не найден файл 1c_common_module.sh!" ; exit 1; }
 
-function check_cache_dir {
-    [[ -d "${1}" ]] || error "Неверно задан каталог хранения кэша данных кластера!"
-}
-
 function get_clusters_sessions {
 
     CLSTR_LIST=${1##*#}
