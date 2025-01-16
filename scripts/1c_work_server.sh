@@ -34,6 +34,8 @@ function get_calls_info {
 
 	[[ -n ${2} ]] && TOP_LIMIT=${2} || TOP_LIMIT=25
 
+	printf "${LOG_DATE}\n"
+
 	case ${MODE} in
 	count) printf "%10s|%12s|%12s|%12s|%12s|%12s|%12s|%s\t%s\n" "Count" "Duration" "CPU" "AvgDuration" "AvgCPU" "PeakRAM" "RAM" "Context" ;;
 	cpu) printf "%12s|%12s|%12s|%12s|%10s|%12s|%12s|%s\t%s\n" "CPU" "AvgCPU" "Duration" "AvgDuration" "Count" "PeakRAM" "RAM" "Context" ;;
@@ -728,6 +730,7 @@ function get_available_perfomance {
 
 case ${1} in
     calls | locks | excps | cluster) check_log_dir "${2}" "${1}";
+		export LOG_DATE="$(echo "$(date --date="last hour" "+%d.%m.%y %H:00") - $(date "+%d.%m.%y %H:00")")"
         export LOG_FILE=$(date --date="last hour" "+%y%m%d%H");
         export LOG_DIR="${2%/}/zabbix/${1}" ;;&
 	perfomance) check_cache_dir "${2}";
