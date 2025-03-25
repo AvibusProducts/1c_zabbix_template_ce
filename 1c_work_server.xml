@@ -237,8 +237,8 @@
                     <name>[1С/Серверные вызовы] ТОП по суммарному количеству</name>
                     <key>1c.ws.calls[{$LOG_DIR},count,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m4s30</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -251,8 +251,8 @@
                     <name>[1С/Серверные вызовы] ТОП по суммарному процессорному времени</name>
                     <key>1c.ws.calls[{$LOG_DIR},cpu,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m1s30</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -265,8 +265,8 @@
                     <name>[1С/Серверные вызовы] ТОП по суммарной длительности</name>
                     <key>1c.ws.calls[{$LOG_DIR},duration,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m1</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -279,8 +279,8 @@
                     <name>[1С/Серверные вызовы] ТОП по средней длительности</name>
                     <key>1c.ws.calls[{$LOG_DIR},dur_avg,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m2</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -293,8 +293,8 @@
                     <name>[1С/Серверные вызовы] ТОП по суммарному вводу-выводу</name>
                     <key>1c.ws.calls[{$LOG_DIR},iobytes,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m4</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -307,8 +307,8 @@
                     <name>[1С/Серверные вызовы] ТОП &quot;ленивых&quot; вызовов</name>
                     <key>1c.ws.calls[{$LOG_DIR},lazy,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m3s30</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -321,8 +321,8 @@
                     <name>[1С/Серверные вызовы] ТОП по не освобожденной памяти за вызов</name>
                     <key>1c.ws.calls[{$LOG_DIR},memory,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m2s30</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -335,8 +335,8 @@
                     <name>[1С/Серверные вызовы] ТОП по максимальной памяти за вызов</name>
                     <key>1c.ws.calls[{$LOG_DIR},memorypeak,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m3</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -349,8 +349,8 @@
                     <name>[1С/Рабочий сервер] ТОП событий кластера</name>
                     <key>1c.ws.cluster[{$LOG_DIR},{$TOP_LIST_SIZE}]</key>
                     <delay>0;m1</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -367,8 +367,9 @@
                     <name>[1С/СУБД] ТОП длительности запросов на СУБД</name>
                     <key>1c.ws.db[{$LOG_DIR},list,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m1</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -381,8 +382,9 @@
                     <name>[1С/СУБД] Суммарная длительность запросов на СУБД</name>
                     <key>1c.ws.db_summary[{$LOG_DIR}]</key>
                     <delay>0;m1</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -395,8 +397,8 @@
                     <name>[1С/Рабочий сервер] ТОП ошибок процессов</name>
                     <key>1c.ws.excps[{$LOG_DIR},list,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m1</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -412,9 +414,10 @@
                     <uuid>249204b33f304bf0979e5d7249327c4b</uuid>
                     <name>[1С/Рабочий сервер] ТОП текущих ошибок кластера</name>
                     <key>1c.ws.excps[{$LOG_DIR},list_current,{$TOP_LIST_SIZE},{$EXCP_FILTER}]</key>
+                    <history>7d</history>
+                    <value_type>TEXT</value_type>
                     <trends>0</trends>
                     <status>DISABLED</status>
-                    <value_type>TEXT</value_type>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -428,8 +431,8 @@
                     <triggers>
                         <trigger>
                             <uuid>1856ce1015f442538e96529cf734be9d</uuid>
-                            <expression>nodata(/Template App 1C Enterprise Work Server/1c.ws.excps[{$LOG_DIR},list_current,{$TOP_LIST_SIZE},{$EXCP_FILTER}],1m)=0</expression>
-                            <name>[1С/APDEX] Общее значение APDEX нет данных</name>
+                            <expression>length(last(/Template App 1C Enterprise Work Server/1c.ws.excps[{$LOG_DIR},list_current,{$TOP_LIST_SIZE},{$EXCP_FILTER}]))&gt;0</expression>
+                            <name>[1С/Ошибки] Обнаружены критичные ошибки</name>
                             <priority>HIGH</priority>
                         </trigger>
                     </triggers>
@@ -441,8 +444,9 @@
                     <key>1c.ws.excps[{$LOG_DIR}]</key>
                     <delay>0;m2</delay>
                     <history>0</history>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -459,8 +463,8 @@
                     <name>[1С/Рабочий сервер] ТОП ошибок лицензирования</name>
                     <key>1c.ws.lic[{$LOG_DIR},{$TOP_LIST_SIZE}]</key>
                     <delay>0;m1</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -534,6 +538,7 @@
                             <uuid>051a362a6a9d40edbc18fc6cf55c803d</uuid>
                             <expression>last(/Template App 1C Enterprise Work Server/1c.ws.locks.lock)=0</expression>
                             <name>[1С/Блокировки] Отсутствуют блокировки</name>
+                            <status>DISABLED</status>
                             <priority>INFO</priority>
                         </trigger>
                     </triggers>
@@ -545,6 +550,7 @@
                     <key>1c.ws.locks.lock_duration</key>
                     <delay>0</delay>
                     <value_type>FLOAT</value_type>
+                    <status>DISABLED</status>
                     <units>s</units>
                     <preprocessing>
                         <step>
@@ -577,9 +583,11 @@
                         <step>
                             <type>REGEX</type>
                             <parameters>
-                                <parameter>\|.*?(\d+\.\d*).*?!Общ</parameter>
+                                <parameter>.*?(\d+\.\d*).*?!Общ</parameter>
                                 <parameter>\1</parameter>
                             </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>0</error_handler_params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -631,8 +639,8 @@
                     <type>DEPENDENT</type>
                     <key>1c.ws.locks.wait</key>
                     <delay>0</delay>
-                    <status>DISABLED</status>
                     <value_type>FLOAT</value_type>
+                    <status>DISABLED</status>
                     <units>s</units>
                     <preprocessing>
                         <step>
@@ -666,8 +674,8 @@
                     <name>[1С/Блокировки] ТОП блокировок</name>
                     <key>1c.ws.locks[{$LOG_DIR},{$MAX_LOCK_WAIT},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS},list,{$TOP_LIST_SIZE}]</key>
                     <delay>0;m4</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -684,8 +692,8 @@
                     <name>[1С/Блокировки] Сводка</name>
                     <key>1c.ws.locks[{$LOG_DIR},{$MAX_LOCK_WAIT},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     <delay>0;m1</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -937,8 +945,8 @@
                     <name>[1С/APDEX] ТОП операций Benchmark</name>
                     <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE},{$APDEX_LIST_BENCH}]</key>
                     <delay>0;m0,15,30,45s40</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -951,8 +959,8 @@
                     <name>[1С/APDEX] ТОП операций с худшим APDEX Пользователи</name>
                     <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE},{$APDEX_LIST_CLN}]</key>
                     <delay>0;m0,15,30,45s40</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -965,8 +973,8 @@
                     <name>[1С/APDEX] ТОП операций с худшим APDEX WEB</name>
                     <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE},{$APDEX_LIST_WEB}]</key>
                     <delay>0;m0,15,30,45s20</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -979,8 +987,8 @@
                     <name>[1С/APDEX] ТОП операций с худшим APDEX</name>
                     <key>1c.ws.measures[{$MEASURE_LOG_DIR},{$TOP_LIST_SIZE}]</key>
                     <delay>0;m0,15,30,45</delay>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -995,16 +1003,12 @@
                     <key>1c.ws.memory</key>
                     <delay>30s</delay>
                     <history>0</history>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
                             <value>[1С] Информация</value>
-                        </tag>
-                        <tag>
-                            <tag>Application</tag>
-                            <value>[1С] Производительность</value>
                         </tag>
                     </tags>
                 </item>
@@ -1022,6 +1026,8 @@
                                 <parameter>sqlservr: \d+ (\d+) \d</parameter>
                                 <parameter>\1</parameter>
                             </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>0</error_handler_params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -1052,6 +1058,8 @@
                                 <parameter>sqlservr: \d+ \d+ (\d+)</parameter>
                                 <parameter>\1</parameter>
                             </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>0</error_handler_params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -1096,6 +1104,8 @@
                                 <parameter>postgres: \d+ (\d+) \d</parameter>
                                 <parameter>\1</parameter>
                             </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>0</error_handler_params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -1126,6 +1136,8 @@
                                 <parameter>postgres: \d+ \d+ (\d+)</parameter>
                                 <parameter>\1</parameter>
                             </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>0</error_handler_params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -1196,6 +1208,7 @@
                             <uuid>e051539ec7664273b1f640de3422c433</uuid>
                             <expression>last(/Template App 1C Enterprise Work Server/1c.ws.ragent.debug)=1</expression>
                             <name>[1С/Рабочий сервер] Включен режим отладки</name>
+                            <status>DISABLED</status>
                             <priority>AVERAGE</priority>
                         </trigger>
                     </triggers>
@@ -1206,6 +1219,7 @@
                     <type>DEPENDENT</type>
                     <key>1c.ws.ragent.excps</key>
                     <delay>0</delay>
+                    <status>DISABLED</status>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
@@ -1239,6 +1253,8 @@
                                 <parameter>ragent: \d+ (\d+) \d+</parameter>
                                 <parameter>\1</parameter>
                             </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>0</error_handler_params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -1261,6 +1277,7 @@
                     <type>ZABBIX_ACTIVE</type>
                     <key>1c.ws.ram</key>
                     <delay>1h</delay>
+                    <status>DISABLED</status>
                     <units>B</units>
                     <tags>
                         <tag>
@@ -1300,6 +1317,7 @@
                     <type>DEPENDENT</type>
                     <key>1c.ws.rmngr.excps</key>
                     <delay>0</delay>
+                    <status>DISABLED</status>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
@@ -1333,6 +1351,8 @@
                                 <parameter>rmngr: \d+ (\d+)</parameter>
                                 <parameter>\1</parameter>
                             </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>0</error_handler_params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -1408,6 +1428,7 @@
                     <type>DEPENDENT</type>
                     <key>1c.ws.rphost.excps</key>
                     <delay>0</delay>
+                    <status>DISABLED</status>
                     <preprocessing>
                         <step>
                             <type>REGEX</type>
@@ -1441,6 +1462,8 @@
                                 <parameter>rphost: \d+ (\d+) \d</parameter>
                                 <parameter>\1</parameter>
                             </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>0</error_handler_params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -1471,6 +1494,8 @@
                                 <parameter>rphost: \d+ \d+ (\d+)</parameter>
                                 <parameter>\1</parameter>
                             </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>0</error_handler_params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -1515,7 +1540,7 @@
                 </macro>
                 <macro>
                     <macro>{$EXCP_FILTER}</macro>
-                    <value>лиценз</value>
+                    <value>лиценз,Лиценз</value>
                 </macro>
                 <macro>
                     <macro>{$EXCP_THRESHOLD}</macro>

@@ -208,9 +208,9 @@ function get_measures_info {
             count=0; \
             countT=0; \
             count4T=0; \
-            for (value in values) { \
+	    for (value in values) { \
                 split(values[value], curValueWeight, "_"); \
-				if (!curValueWeight[1]) continue; \
+				if (curValueWeight[1]/1 == 0) continue; \
 				curWeight = curValueWeight[2]; \
 				if (!curWeight||curWeight==0) curWeight=1; \
 				curValue=curValueWeight[1]/curWeight; \
@@ -578,7 +578,7 @@ function get_lic_errors_info {
 
 function get_memory_counts {
 
-	RPHOST_PID_HASH="${TMPDIR}/1c_rphost_pid_hash"
+	RPHOST_PID_HASH="${CLSTR_CACHE_DIR}/1c_rphost_pid_hash"
 
 	if [[ -z "${IS_WINDOWS}" ]]; then
 		ps -hwwp "$(pgrep -d, 'ragent|rphost|rmngr|postgres|sqlservr')" -o comm,pid,rss,vsz,cmd -k pid |
@@ -733,8 +733,9 @@ case ${1} in
 		export LOG_DATE="$(echo "$(date --date="last hour" "+%d.%m.%y %H:00") - $(date "+%d.%m.%y %H:00")")"
         export LOG_FILE=$(date --date="last hour" "+%y%m%d%H");
         export LOG_DIR="${2%/}/zabbix/${1}" ;;&
-	perfomance) check_cache_dir "${2}";
-        export CLSTR_CACHE_DIR="${2}";
+	perfomance | memory)
+        	export CLSTR_CACHE_DIR="${2}";
+		check_cache_dir "${CLSTR_CACHE_DIR}";
 		export CLSTR_CACHE="${CLSTR_CACHE_DIR}/1c_clusters_cache";
 		export IB_CACHE="${CLSTR_CACHE_DIR}/1c_infobase_cache";;&
     excps) PROCESS_NAMES=(ragent rmngr rphost) ;;&

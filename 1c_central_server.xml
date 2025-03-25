@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
-    <version>6.0</version>
-    <date>2023-12-22T11:57:28Z</date>
-    <groups>
-        <group>
+    <version>6.4</version>
+    <template_groups>
+        <template_group>
             <uuid>d83f326f893144b0b86d0e7c36a5b1d9</uuid>
             <name>Templates/1C</name>
-        </group>
-        <group>
+        </template_group>
+        <template_group>
             <uuid>a571c0d144b14fd4a87a9d9b2aa9fcd6</uuid>
             <name>Templates/Applications</name>
-        </group>
-    </groups>
+        </template_group>
+    </template_groups>
     <templates>
         <template>
             <uuid>c080207928df4af39b139161b3890077</uuid>
@@ -36,8 +35,9 @@
                     <key>1c.cs.ib.restrictions</key>
                     <delay>5m</delay>
                     <history>0</history>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -338,8 +338,8 @@
                     <type>ZABBIX_ACTIVE</type>
                     <key>1c.cs.sessions[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     <history>0</history>
-                    <trends>0</trends>
                     <value_type>TEXT</value_type>
+                    <trends>0</trends>
                     <tags>
                         <tag>
                             <tag>Application</tag>
@@ -355,7 +355,6 @@
                     <type>ZABBIX_ACTIVE</type>
                     <key>1c.cs.clusters.discovery[{$CLSTR_CACHE_DIR},{$RAS_PORTS},{$RAS_TIMEOUT},{$RAS_USER},{$RAS_PASS}]</key>
                     <delay>1h</delay>
-                    <status>DISABLED</status>
                     <item_prototypes>
                         <item_prototype>
                             <uuid>f6922bd7066d4932af19f67ebf519333</uuid>
@@ -756,6 +755,8 @@
                             <type>DEPENDENT</type>
                             <key>1c.cs.ib.sched_deny[{#IB_UUID}]</key>
                             <delay>0</delay>
+                            <status>DISABLED</status>
+                            <discover>NO_DISCOVER</discover>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
@@ -789,6 +790,8 @@
                             <type>DEPENDENT</type>
                             <key>1c.cs.ib.sess_deny[{#IB_UUID}]</key>
                             <delay>0</delay>
+                            <status>DISABLED</status>
+                            <discover>NO_DISCOVER</discover>
                             <preprocessing>
                                 <step>
                                     <type>REGEX</type>
@@ -823,8 +826,8 @@
                             <key>1c.cs.sessions.asu[{#IB_UUID}]</key>
                             <delay>0</delay>
                             <history>14d</history>
-                            <trends>0</trends>
                             <value_type>TEXT</value_type>
+                            <trends>0</trends>
                             <description>Пользовательский сеанс (имя пользователя, номер сеанса) с самым долгим активным текущим вызовом (время вызова текущее)</description>
                             <preprocessing>
                                 <step>
@@ -969,6 +972,12 @@
                                     <expression>last(/Template App 1C Enterprise Central Server/1c.cs.sessions.cld[{#IB_UUID}])&gt;{$CALL_DUR_THRESHOLD}</expression>
                                     <name>[1С/Ифобаза/{#IB_NAME}] Превышен порог длительности пользовательского вызова</name>
                                     <priority>AVERAGE</priority>
+                                    <tags>
+                                        <tag>
+                                            <tag>NotEmail</tag>
+                                            <value>true</value>
+                                        </tag>
+                                    </tags>
                                 </trigger_prototype>
                             </trigger_prototypes>
                         </item_prototype>

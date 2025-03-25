@@ -29,11 +29,11 @@ else
 fi
 
 function check_cache_dir {
-    [[ -d "${1}" ]] || error "Неверно задан каталог хранения кэша данных кластера!"
+    [[ -d "${1}" ]] || export CLSTR_CACHE_DIR="/tmp"
 }
 
 # Проверить инициализацию переменной CLSTR_CACHE_DIR
-[[ -z ${CLSTR_CACHE_DIR} ]] && export CLSTR_CACHE_DIR=${CLSTR_CACHE_DIR}
+[[ -z "${CLSTR_CACHE_DIR}" ]] && export CLSTR_CACHE_DIR="/tmp"
 
 # Файл списка кластеров
 export CLSTR_CACHE="${CLSTR_CACHE_DIR}/1c_clusters_cache"
