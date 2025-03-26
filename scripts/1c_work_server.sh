@@ -43,8 +43,9 @@ function get_calls_info {
 	lazy) printf "%12s|%12s|%12s|%12s|%10s|%12s|%12s|%s\t%s\n" "Dur/CPU" "AvgDur/AvgCPU" "Duration" "CPU" "Count" "PeakRAM" "RAM" "Context" ;;
 	dur_avg) printf "%12s|%12s|%12s|%12s|%10s|%12s|%12s|%s\t%s\n" "AvgDuration" "Duration" "CPU" "AvgCPU" "Count" "PeakRAM" "RAM" "Context" ;;
 	cpu_avg) printf "%12s|%12s|%12s|%12s|%10s|%12s|%12s|%s\t%s\n" "AvgCPU" "CPU" "AvgDuration" "Duration" "Count" "PeakRAM" "RAM" "Context" ;;
-	memorypeak) printf "%12s|%12s|%12s|%12s|%12s|%12s|%10s|%s\t%s\n" "PeakRAM" "PeakSumRAM" "RAM" "AvgRAM" "Duration" "AvgDuration" "Count" "Context" ;;
-	memory) printf "%12s|%12s|%12s|%12s|%12s|%12s|%10s|%s\t%s\n" "RAM" "AvgRAM" "PeakRAM" "AvgPeakRAM" "Duration" "AvgDuration" "Count" "Context" ;;
+	memorypeak) printf "%12s|%12s|%12s|%12s|%12s|%12s|%10s|%s\t%s\n" "PeakRAM" "PeakSumRAM" "RAM" "AvgRAM" "Duration" "CPU" "Count" "Context" ;;
+	memory) printf "%12s|%12s|%12s|%12s|%12s|%12s|%10s|%s\t%s\n" "RAM" "AvgRAM" "PeakRAM" "AvgPeakRAM" "RAM+" "RAM-" "Count" "Context" ;;
+	memory_neg) printf "%12s|%12s|%12s|%12s|%12s|%12s|%10s|%s\t%s\n" "RAM-" "AvgRAM" "PeakRAM" "AvgPeakRAM" "RAM+" "RAM" "Count" "Context" ;;
 	iobytes) printf "%12s|%12s|%12s|%12s|%12s|%12s|%10s|%s\t%s\n" "SumIO" "AvgIO" "Input" "Output" "Duration" "AvgDuration" "Count" "Context" ;;
 	*) error "${ERROR_UNKNOWN_PARAM}" ;;
 	esac
@@ -74,9 +75,12 @@ function get_calls_info {
 		if (mode == "iobytes") { \
 			In[Group][Cntx]+=CurInBytes; \
 			Out[Group][Cntx]+=CurOutBytes; \
+		} else if (mode == "memory" || mode == "memory_neg") { \
+			if (CurMem > 0) MemPos[Group][Cntx]+=CurMem;
+			else MemNeg[Group][Cntx]+=CurMem;
 		} \
 		} END \
-		{Koef=1000*1000; KoefMem=1024*1024; Summary=0; SummaryGroups["WebServer"]=0; SummaryGroups["ServerCall"]=0; SummaryGroups["BackgroundJob"]=0;\
+		{Koef=1000*1000; KoefMem=1024*1024; Summary=0; SummaryPos=0; SummaryNeg=0; SummaryGroups["WebServer"]=0; SummaryGroups["ServerCall"]=0; SummaryGroups["BackgroundJob"]=0;\
 		if (mode == "count") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
@@ -155,12 +159,30 @@ function get_calls_info {
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
 					cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
+					cMemPos=MemPos[Group][Cntx]/KoefMem; cMemNeg=MemNeg[Group][Cntx]/KoefMem; \
 					Summary+=cMem; \
+					SummaryPos+=cMemPos;
+					SummaryNeg+=cMemNeg;
 					SummaryGroups[Types[Group][Cntx]]+=cMem;
 					printf "%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%10d|%s\t%s\n", \
-					cMem, cMem/cExecs, cMemP, cMemP/cExecs, cDur, cCpuTime, cExecs, Group, Cntx } } \
-			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общая не освобожденная память", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
+					cMem, cMem/cExecs, cMemP, cMemP/cExecs, cMemPos, cMemNeg, cExecs, Group, Cntx } } \
+			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общая не освобожденная память", SummaryPos, "Потреблено", SummaryNeg, "Освобождено", 
+				SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
+		else if (mode == "memory_neg") { \
+                        for (Group in Dur) { \
+                                for (Cntx in Dur[Group]) { \
+                                        cDur=Dur[Group][Cntx]/Koef; cExecs=Execs[Group][Cntx]; cCpuTime=CpuTime[Group][Cntx]/Koef; cMemP=MemPeak[Group][Cntx]/KoefMem; cMem=Mem[Group][Cntx]/KoefMem; \
+                                        cMemPos=MemPos[Group][Cntx]/KoefMem; cMemNeg=MemNeg[Group][Cntx]/KoefMem; \
+                                        Summary+=cMem; \
+                                        SummaryPos+=cMemPos;
+                                        SummaryNeg+=cMemNeg;
+                                        SummaryGroups[Types[Group][Cntx]]+=cMem;
+                                        printf "%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%12.3f|%10d|%s\t%s\n", \
+                                        cMemNeg, cMem/cExecs, cMemP, cMemP/cExecs, cMemPos, cMem, cExecs, Group, Cntx } } \
+			printf "-9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общая не освобожденная память", SummaryPos, "Потреблено", SummaryNeg, "Освобождено",
+                                SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
+                } \
 		else if (mode == "iobytes") { \
 			for (Group in Dur) { \
 				for (Cntx in Dur[Group]) { \
@@ -173,7 +195,7 @@ function get_calls_info {
 			printf "9999999999_%12.3f|\t%s; %.3f - %s; %.3f - %s; %.3f - %s\n", Summary, "!Общая сумма ввода-вывода", SummaryGroups["ServerCall"], "ServerCall", SummaryGroups["WebServer"], "WebServer", SummaryGroups["BackgroundJob"], "BackgroundJob"; \
 		} \
 		}' |
-		sort -rn 2>/dev/null | head -n "${TOP_LIMIT}" | perl -pe 's/9999999999_//; s/.+?!\|//'
+		{ [[ "$MODE" = "memory_neg" ]] && sort -n 2>/dev/null || sort -rn 2>/dev/null; } | head -n "${TOP_LIMIT}" | perl -pe 's/-?9999999999_//; s/.+?!\|//'
 
 }
 
