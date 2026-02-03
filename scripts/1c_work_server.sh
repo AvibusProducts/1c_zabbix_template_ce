@@ -52,32 +52,44 @@ function get_calls_info {
 
 	put_brack_line 150
 
-	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | awk "/CALL,.*?(Context|Module|applicationName=Web)/" |
-		perl -pe 's/\xef\xbb\xbf//g' |
-		perl -pe 's/(\d{2}:\d{2})\.(\d{6})-(\d+)/$3/g' |
-		# Серверные вызовы
-		perl -pe 's/(.+?),CALL,.*?p:processName=(.+?),.*?Usr=(.+?),.*?Context=(.*?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$1ϖServerCallϖ$2ϖ$3ϖ$4ϖ$5ϖ$6ϖ$7ϖ$8ϖ$9/' |
-		# Регламентные задания
-		perl -pe 's/(.+?),CALL,.*?Usr=(.+?),.*?p:processName=(.+?),.*?Module=(.+),Method=(.*?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$1ϖBackgroundJobϖ$3ϖ$2ϖ$4.$5ϖ$6ϖ$7ϖ$8ϖ$9ϖ$10/' |
-		# Веб-сервисы
-		perl -pe 's/(.+?),CALL,.*?p:processName=(.+?),.*?=WebServerExtension.*?,Usr=(.+?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$1ϖWebServerϖ$2ϖ$3ϖWebServerϖ$4ϖ$5ϖ$6ϖ$7ϖ$8/' |
-		gawk -F'ϖ' -v mode="${MODE}" '\
-		{CurDur=$1; Type=$2; Db=$3; Usr=$4; Cntx="Cntx="$5; \
+	cat "${LOG_DIR}"/rphost_*/"${LOG_FILE}.log" 2>/dev/null | awk "/(CALL|VRSREQUEST),.*?(Context|Module|applicationName=Web)/" |
+	perl -pe 's/\xef\xbb\xbf//g' |
+	perl -pe 's/(\d{2}:\d{2})\.(\d{6})-(\d+)/$3/g' |
+	# Серверные вызовы
+	perl -pe 's/(.+?),CALL,.*?p:processName=(.+?),.*?t:connectID=(\d+?),.*?Usr=(.+?),.*?Context=(.*?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$1ϖServerCallϖ$2ϖ$3ϖ$4ϖ$5ϖ$6ϖ$7ϖ$8ϖ$9ϖ$10/' |
+	# Регламентные задания
+	perl -pe 's/(.+?),CALL,.*?t:connectID=(\d+?),.*?Usr=(.+?),.*?p:processName=(.+?),.*?Module=(.+),Method=(.*?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$1ϖBackgroundJobϖ$3ϖ$2ϖ$4.$5ϖ$6ϖ$7ϖ$8ϖ$9ϖ$10ϖ$11/' |
+	# Веб-сервисы
+	perl -pe 's/(.+?),CALL,.*?p:processName=(.+?),.*?=WebServerExtension.*?,t:connectID=(\d+?),.*?Usr=(.+?),.*?Memory=(.*?),.*?MemoryPeak=(.*?),.*?InBytes=(.*?),.*?OutBytes=(.*?),.*?CpuTime=(.*?)($|,.*$)/$1ϖWebServerϖ$2ϖ$3ϖ$4ϖWebServerϖ$5ϖ$6ϖ$7ϖ$8ϖ$9/' |
+	# VRSREQUEST
+	perl -pe 's/(.+?),VRSREQUEST,.*?p:processName=(.+?),.*?=WebServerExtension.*?,t:connectID=(\d+?),.*?URI=(\/?[wh].*?)($|,.*$)/$1ϖVrsReqϖ$2ϖ$3ϖNoUsrϖVrsReqϖ$4ϖ$5/' |
+	awk "/^[0-9]+ϖ/" |
+	gawk -F'ϖ' -v mode="${MODE}" '\
+		{CurDur=$1; Type=$2; Db=$3; Conn=$4; Usr=$5; Cntx="Cntx="$6; \
 		Group=Type ":" Db; \
-		if (Type=="WebServer" || Type=="BackgroundJob") Group=Group ":" Usr; \
-		CurMem=$6; CurMemPeak=$7; CurInBytes=$8; CurOutBytes=$9; CurCpuTime=$10; \
-		Dur[Group][Cntx]+=CurDur; \
-		CpuTime[Group][Cntx]+=CurCpuTime; \
-		Mem[Group][Cntx]+=CurMem; \
-		Execs[Group][Cntx]+=1; \
-		Types[Group][Cntx]=Type;
-		if (!MemPeak[Group][Cntx] || MemPeak[Group][Cntx] < CurMemPeak) MemPeak[Group][Cntx]=CurMemPeak; \
-		if (mode == "iobytes") { \
-			In[Group][Cntx]+=CurInBytes; \
-			Out[Group][Cntx]+=CurOutBytes; \
-		} else if (mode == "memory" || mode == "memory_neg") { \
-			if (CurMem > 0) MemPos[Group][Cntx]+=CurMem;
-			else MemNeg[Group][Cntx]+=CurMem;
+
+		if (Type=="VrsReq") { \
+			uri[Db][Conn]=$7; \
+		} else { \
+			if (Type=="WebServer" || Type=="BackgroundJob") Group=Group ":" Usr; \
+			if (Type=="WebServer" && uri[Db][Conn]!=null) { \
+				Cntx = "Cntx="uri[Db][Conn]; \
+				uri[Db][Conn] = null; \
+			} \
+			CurMem=$7; CurMemPeak=$8; CurInBytes=$9; CurOutBytes=$10; CurCpuTime=$11; \
+			Dur[Group][Cntx]+=CurDur; \
+			CpuTime[Group][Cntx]+=CurCpuTime; \
+			Mem[Group][Cntx]+=CurMem; \
+			Execs[Group][Cntx]+=1; \
+			Types[Group][Cntx]=Type; \
+			if (!MemPeak[Group][Cntx] || MemPeak[Group][Cntx] < CurMemPeak) MemPeak[Group][Cntx]=CurMemPeak; \
+			if (mode == "iobytes") { \
+				In[Group][Cntx]+=CurInBytes; \
+				Out[Group][Cntx]+=CurOutBytes; \
+			} else if (mode == "memory" || mode == "memory_neg") { \
+				if (CurMem > 0) MemPos[Group][Cntx]+=CurMem; \
+				else MemNeg[Group][Cntx]+=CurMem; \
+			} \
 		} \
 		} END \
 		{Koef=1000*1000; KoefMem=1024*1024; Summary=0; SummaryPos=0; SummaryNeg=0; SummaryGroups["WebServer"]=0; SummaryGroups["ServerCall"]=0; SummaryGroups["BackgroundJob"]=0;\
